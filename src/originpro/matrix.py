@@ -137,7 +137,7 @@ class MSheet(DSheet):
 
     def from_np2d(self, arr, index=0):
         """
-        Transfers data from a a numpy 2D array into a single MatrixObject.
+        Transfers data from a numpy 2D array into a single MatrixObject.
 
         Parameters:
             arr (numpy array) 2D
