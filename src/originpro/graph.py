@@ -6,7 +6,7 @@ Copyright (c) 2020 OriginLab Corporation
 # pylint: disable=C0301,C0103,C0302,W0622,R0913,W0212
 from .config import po
 from .base import BaseObject, BaseLayer, BasePage, _layer_range
-from .utils import to_rgb, ocolor, get_file_parts, last_backslash, origin_class
+from .utils import to_rgb, ocolor, get_file_parts, last_backslash, origin_class, org_ver
 
 
 class Axis:
@@ -352,7 +352,7 @@ class Plot(BaseObject):
     @property
     def colormap(self):
         """
-        Returns the colormap name aa string
+        Returns the colormap name a string
 
         Parameters:
 
@@ -384,7 +384,10 @@ class Plot(BaseObject):
         """
         namelow = name.lower()
         if namelow.endswith('.pal') or namelow.endswith('.xml'):
-            self.layer.SetStrProp(self._format_property('cmap.palette'), name)
+            if org_ver() < 10.0:
+                self.layer.SetStrProp(self._format_property('cmap.palette'), name)
+            else:
+                self.layer.SetStrProp(self._format_property('colorlist'), name)
             self.layer.SetNumProp(self._format_property('cmap.stretchpal'), 1)
         else:
             self.layer.SetStrProp(self._format_property('colorlist'), name)
@@ -459,12 +462,7 @@ class Plot(BaseObject):
         minor_levels = dict['minors']
         listlevels = dict['levels']
         strTempLTvarName = '__opZLevelsVar$' #must start with "__" so that it matches LT_SYS_STR_PREFIX
-        strVarValue = ''
-        for ii, level in enumerate(listlevels):
-            strval = str(level)
-            if ii > 0:
-                strVarValue += '|'
-            strVarValue += strval
+        strVarValue = '|'.join(str(level) for level in listlevels)
 
         self.layer.DoMethod(self._format_property('cmap.setLevels'), '1') # set Levels by Major
         po.LT_set_str(strTempLTvarName, strVarValue)
@@ -723,6 +721,22 @@ class Plot(BaseObject):
             cmds.append(f'set rr {arg}')
         if cmds:
             self.layer.LT_execute('{' + ';'.join(cmds) + '}')
+
+    @property
+    def group(self):
+        """
+        Check if data plot in group or not. 
+
+        Parameters:
+
+        Returns:
+            (int) 0: Not in group, 1: Group Head, 2: Group Member
+
+        Examples:
+            pl = g[0].plot_list()[0]
+            group = pl.group
+        """
+        return int(self.layer.GetNumProp(self._format_property('group')))
 
 
 class GLayer(BaseLayer):

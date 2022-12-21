@@ -50,6 +50,10 @@ except ImportError:
             po.Detach()
     atexit.register(_exit_handler)
 
+import warnings
+if po.LT_get_var('@V') < 10.05:
+    warnings.simplefilter(action='ignore', category=FutureWarning)
+
 try:
     import numpy as np
     npdtype_to_orgdtype = {

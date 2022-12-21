@@ -62,42 +62,44 @@ class WSheet(DSheet):
     def _set_col_LN(colobj, key, col):
         if isinstance(key, int) and key == col:
             return
-        if isinstance(key, str):
-            colobj.LongName = key
-        else:
-            colobj.LongName = str(key)
+        colobj.LongName = str(key)
     @staticmethod
     def _getlabel(colobj, type):
         if isinstance(type, int):
             if type < 0 or type > 15:
                 raise ValueError('Invalid index to user parameter')
             return colobj.GetUserDefLabel(type)
-        if len(type) > 1:
+        try:
+            dd = {
+                'L': colobj.GetLongName,
+                'C': colobj.GetComments,
+                'U': colobj.GetUnits,
+                'G': colobj.GetName,
+                }
+            func = dd[type]
+            return func()
+        except KeyError:
             raise ValueError('Invalid label row character')
-        dd = {
-            'L': colobj.GetLongName,
-            'C': colobj.GetComments,
-            'U': colobj.GetUnits,
-            'G': colobj.GetName,
-            }
-        func = dd[type]
-        return func()
     @staticmethod
     def _setlabel(colobj, type, val):
         """type is int if user parameter row, or 'L', 'C', 'U' etc, see _col_label_row()"""
         if isinstance(type, int):
             if type < 0 or type > 15:
                 raise ValueError('Invalid index to user parameter')
-            return colobj.SetUserDefLabel(type, val)
+            return colobj.SetUserDefLabel(type, str(val))
         if len(type) > 1:
             raise ValueError('Invalid label row character')
-        dd = {
-            'L': colobj.SetLongName,
-            'C': colobj.SetComments,
-            'U': colobj.SetUnits,
-            }
-        func = dd[type]
-        return func(val)
+        try:
+            dd = {
+                'L': colobj.SetLongName,
+                'C': colobj.SetComments,
+                'U': colobj.SetUnits,
+                'G': colobj.SetName,
+                }
+            func = dd[type]
+            return func(str(val))
+        except KeyError:
+            raise ValueError('Invalid label row character')
 
     @staticmethod
     def _cname(colobj, type):
@@ -255,12 +257,13 @@ class WSheet(DSheet):
         bSetColumnAsMixedInGeneralCase = int(po.LT_get_var('@DFSM')) > 0    # ML 06/26/2020 ORG-21995-P2 FROM_DF_DONT_SET_TEXT_AND_NUMERIC_FOR_GENERAL_CASE_BY_DEFAULT
 
         col = colBeginData
-        for key, value in df.iteritems():
+        for key, value in df.items():
             colobj = self.obj[col]
             if str(value.dtype) == 'category':
                 dfseriestypechar = 'cat'        # our own "name" for convenience
             else:
-                dfseriestypechar = df.dtypes[col - colBeginData].char
+                #dfseriestypechar = df.dtypes[col - colBeginData].char
+                dfseriestypechar = value.dtype.char
             #print(dfseriestypechar)
             #print(value)
             displayFmt = -1
@@ -340,6 +343,7 @@ class WSheet(DSheet):
         cindex = self._col_index(cindex)
         if self.obj.Cols <= cindex:    # invalid index column
             raise ValueError('cindex outside of number of columns')
+        lns = set()
         cname=-1
         if head:
             row = self._col_label_row(head)
@@ -393,7 +397,15 @@ class WSheet(DSheet):
                     #df = df.append(pd.Series(), ignore_index = True)
             ## end APPEND_EMPTY_ROWS_BEFORE_LONGER_SERIES_TO_ADD
             #df.insert(loc, self._cname(colobj, cname), dfseries)
-            dd[self._cname(colobj, cname)] = dfseries
+            cname2 = cname
+            if not head:
+                ln = colobj.LongName
+                if ln:
+                    if ln in lns:
+                        cname2 = 'G'
+                    else:
+                        lns.add(ln)
+            dd[self._cname(colobj, cname2)] = dfseries
         df = pd.concat(dd, axis=1)
 
         if cindex >= 0:
@@ -483,13 +495,14 @@ class WSheet(DSheet):
         if ncol < 0:
             raise ValueError('Column does not exist')
         colobj = self.obj[ncol]
-        if len(type) > 1:#user parameter name
-            ii = self._user_param_row(type)
-            if ii < 0:
-                return ''#not found
-            type = ii
-            return self._getlabel(colobj, type)
-
+        if not isinstance(type, int):
+            try:
+                return self._getlabel(colobj, type)
+            except ValueError:
+                pass
+            type = self._user_param_row(type)
+            if type < 0:
+                return '' # not found
         return self._getlabel(colobj, type)
 
     def set_label(self, col, val, type = 'L'):
@@ -514,9 +527,12 @@ class WSheet(DSheet):
         if ncol < 0:
             raise ValueError('Column does not exist')
         colobj = self.obj[ncol]
-        if len(type) > 1:#user parameter name
+        if not isinstance(type, int):
+            try:
+                return self._setlabel(colobj, type, val)
+            except ValueError:
+                pass
             type = self._user_param_row(type, True)
-
         self._setlabel(colobj, type, val)
 
     def get_labels(self, type_ = 'L'):
@@ -533,13 +549,7 @@ class WSheet(DSheet):
             wks=op.find_sheet()
             comments = wks.get_labels('C')
         '''
-        if len(type_) > 1:#user parameter name
-            ii = self._user_param_row(type_)
-            if ii < 0:
-                return []#not found
-            type_ = ii
-
-        return [self._getlabel(colobj, type_) for colobj in self.obj]
+        return [self.get_label(colobj, type_) for colobj in self.obj]
 
     def set_labels(self, labels, type_ = 'L', offset=0):
         """

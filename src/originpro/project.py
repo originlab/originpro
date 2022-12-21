@@ -437,7 +437,7 @@ def save(file=''):
         file (str): Path and file name to save the project as. If blank, the prompt with Save As...
 
     Returns:
-        None
+        (bool) True if project is successfully saved
 
     Examples
         op.save('C:\path\to\My Project.opju')
@@ -448,4 +448,4 @@ def save(file=''):
             raise ValueError('must supplied a path if project not saved yet')
         po.LT_execute('save')
         return
-    po.Save(file)
+    return po.Save(file)

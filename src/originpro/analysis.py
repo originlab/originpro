@@ -14,6 +14,7 @@ class NLFit:
     The name of the fitting function already defined inside Origin must be provided to use this class
     '''
     def __init__(self, func, method='auto'):
+        self._tree_name = ''
         self._ended=False
         self.func=func
         try:
@@ -40,7 +41,9 @@ class NLFit:
         po.LT_execute(f'del -vt {tr}')
 
     def _get_tree_name(self):
-        return '_PY_NLFIT_TREE'
+        if not self._tree_name:
+            self._tree_name = f'_PY_NLFIT_TREE_{id(self)}'
+        return self._tree_name
 
     def _set(self, property, value):
         tr = self._get_tree_name()
@@ -200,6 +203,8 @@ class LinearFit:
     class for performing Linear Fitting with Origin's internal fitting engine
     '''
     def __init__(self):
+        self._tree_name = ''
+        self._output_tree_name = ''
         strGUITreeName = self._get_tree_name()
         po.LT_execute(f'Tree {strGUITreeName}')
         strLT = f'xop execute:=init classname:=FitLinear iotrgui:={strGUITreeName}'
@@ -210,9 +215,13 @@ class LinearFit:
         po.LT_execute(f'del -vt {tr}')
 
     def _get_tree_name(self):
-        return '_PY_LR_TREE'
+        if not self._tree_name:
+            self._tree_name = f'_PY_LR_TREE_{id(self)}'
+        return self._tree_name
     def _get_output_tree_name(self):
-        return '_PY_LR_OUTPUT'
+        if not self._output_tree_name:
+            self._output_tree_name = f'_PY_LR_OUTPUT_{id(self)}'
+        return self._output_tree_name
 
     def _set(self, property, value):
         tr = self._get_tree_name()
