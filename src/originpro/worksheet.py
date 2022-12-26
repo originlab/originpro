@@ -324,7 +324,7 @@ class WSheet(DSheet):
             c1 (int or str): column to start the export
             numcols (int): Total number of columns, -1 to the end
             cindex (int or str): Column to use for DataFrame index if specified
-            head (str): user parameter row name, if not specified, lname(column long name), or short name if lname empty
+            head (str): user parameter or built-in label row name, if not specified, lname(column long name), or short name if lname empty or duplicated
         Returns:
             (DataFrame)
 
@@ -549,7 +549,7 @@ class WSheet(DSheet):
             wks=op.find_sheet()
             comments = wks.get_labels('C')
         '''
-        return [self.get_label(colobj, type_) for colobj in self.obj]
+        return [self.get_label(col, type_) for col in range(self.cols)]
 
     def set_labels(self, labels, type_ = 'L', offset=0):
         """

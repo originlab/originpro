@@ -109,12 +109,16 @@ def set_lt_var(name, value):
     po.LT_set_var(name, value)
 
 def attach():
-    'Attach to exising Origin instance'
+    """
+    Attach to exising Origin instance
+    """
     if oext:
         po.Attach()
 
 def detach():
-    'Detach Origin instance'
+    """
+    Detach Origin instance
+    """
     if oext:
         po.Detach()
 
