@@ -34,5 +34,13 @@ def get_sheet(index=0, _type=_WBOOK_TYPE) -> Union[WSheet, MSheet]:
 def prepare_range(objs_count, sheet_index=0):
     '''
     Prepare column ranges for Connector import
+    Parameters:
+        objs_count(int):
+        sheet_index(int):
+    Returns:
+        the first column index in column range
+    Examples:
+        op.imp.prepare_range(3,0) #This function must be used with the
+                                  #COConnMultipleSheetsMonitorBase class
     '''
-    return po.LT_evaluate(f'doc.ImpPrepareRange({objs_count}, {sheet_index})')
+    return int(po.LT_evaluate(f'doc.ImpPrepareRange({objs_count}, {sheet_index})'))

@@ -4,10 +4,31 @@ A package for interacting with Origin software via Python.
 Copyright (c) 2020 OriginLab Corporation
 """
 # pylint: disable=C0301,C0103,C0302,W0622,R0913,W0212
+from contextlib import contextmanager
 from .config import po
 from .base import BaseObject, BaseLayer, BasePage, _layer_range
 from .utils import to_rgb, ocolor, get_file_parts, last_backslash, origin_class, org_ver
 
+@contextmanager
+def CopyPageRatio(ratio):
+    """
+        temporarily change System.copyPage.ratio
+        Parameters:
+            ratio(float):ratio when copy page
+        Returns:
+            (none)
+        Examples:
+            import originpro as op
+            with op.CopyPageRatio(50) as cpr:
+                print('set System.copyPage.ratio to',op.lt_int('System.copyPage.ratio'))
+            print('set System.copyPage.ratio back to',op.lt_int('System.copyPage.ratio'))
+    """
+
+    COPY_PAGE_RATIO = 'System.CopyPage.Ratio'
+    oldRatio = po.LT_evaluate(COPY_PAGE_RATIO)
+    po.LT_set_var(COPY_PAGE_RATIO, ratio)
+    yield
+    po.LT_set_var(COPY_PAGE_RATIO, oldRatio)
 
 class Axis:
     """
@@ -24,39 +45,123 @@ class Axis:
 
     @property
     def sfrom(self):
-        """get scale limit from value"""
+        """
+        get scale limit from value
+        Parameters:
+            none
+        Returns:
+            scale.from val
+        Examples:
+            gl=op.find_graph()[0]
+            ax=gl.axis('x')
+            print(ax.sfrom)
+        """
         return self.layer.GetNumProp(f'{self.ax}.from')
     @sfrom.setter
     def sfrom(self, value):
-        """set scale limit from value"""
+        """
+        set scale limit from value
+        Parameters:
+            value(float):
+        Returns:
+            scale.from val
+        Examples:
+            gl=op.find_graph()[0]
+            ax=gl.axis('x')
+            ax.sfrom=0.7
+        """
         self.layer.SetNumProp(f'{self.ax}.from', value)
 
     @property
     def sto(self):
-        """get scale limit to value"""
+        """
+        get scale limit to value
+        Parameters:
+            none
+        Returns:
+            scale.to val
+        Examples:
+            gl=op.find_graph()[0]
+            ax=gl.axis('x')
+            print(ax.sto)
+        """
         return self.layer.GetNumProp(f'{self.ax}.to')
     @sto.setter
     def sto(self, value):
-        """set scale limit to value"""
+        """
+        set scale limit to value
+        Parameters:
+            value(float):
+        Returns:
+            none
+        Examples:
+            gl=op.find_graph()[0]
+            ax=gl.axis('x')
+            ax.sto=7
+        """
         self.layer.SetNumProp(f'{self.ax}.to', value)
 
     @property
     def sstep(self):
-        """get scale limit increment"""
+        """
+        get scale limit increment
+        Parameters:
+            none
+        Returns:
+            scale limit increment val
+        Examples:
+            gl=op.find_graph()[0]
+            ax=gl.axis('x')
+            print(ax.sstep)
+        """
         return self.layer.GetNumProp(f'{self.ax}.inc')
     @sstep.setter
     def sstep(self, value):
-        """set scale limit increment"""
+        """
+        set scale limit increment
+        Parameters:
+            value(float):
+        Returns:
+            none
+        Examples:
+            gl=op.find_graph()[0]
+            ax=gl.axis('x')
+            ax.sstep=0.7
+        """
         self.layer.SetNumProp(f'{self.ax}.inc', value)
 
     @property
     def scale(self) -> int:
-        """get axis scale type"""
+        """
+        get axis scale type
+        Parameters:
+            none
+        Returns:
+            scale type:int value for a type
+            1:'linear', 2: 'log10', 3: 'probability', 4: 'probit', 5: 'reciprocal',
+            6:'offset_reciprocal', 7: 'logit', 8: 'ln', 9: 'log2'.
+        Examples,
+            gl=op.find_graph()[0]
+            ax=gl.axis('x')
+            print(ax.scale)
+        """
         return int(self.layer.GetNumProp(f'{self.ax}.type'))
 
     @scale.setter
     def scale(self, value):
-        """set axis scale type"""
+        """
+        set axis scale type
+        Parameters:
+            value(int or str): if int, it is a value between 1 to 9, if string, it can be one of belew:
+            'linear', 'log10', 'probability', 'probit', 'reciprocal', 'offset_reciprocal', 'logit', 'ln', 'log2'
+        Returns:
+            return scale type as int val
+        Examples:
+            gl=op.find_graph()[0]
+            ax=gl.axis('x')
+            ax.scale="log10"
+            ax.scale=3
+        """
         if isinstance(value, int):
             self.layer.SetNumProp(f'{self.ax}.type', value)
         elif isinstance(value, str):
@@ -187,11 +292,14 @@ class Label(BaseObject):
     def remove(self):
         """
         Deletes label.
-
         Parameters:
-
+            none
         Returns:
             None
+        Examples:
+            gl=op.find_graph()[0]
+            label = gl.label('xb')
+            label.remove()
         """
         self.obj.Destroy()
 
@@ -247,6 +355,10 @@ class Label(BaseObject):
 
         Returns:
             (str) Object text
+        Examples:
+            gl=op.find_graph()[0]
+            label = gl.label('xb')
+            print(label.text)
         """
         return self.obj.Text
 
@@ -260,6 +372,10 @@ class Label(BaseObject):
 
         Returns:
             (str) Object text
+        Examples:
+            gl=op.find_graph()[0]
+            label = gl.label('yl')
+            label.text='123'
         """
         self.obj.Text = text
         return self.text
@@ -277,7 +393,18 @@ class Plot(BaseObject):
         return f'plot{nplot}.{prop}'
 
     def lt_range(self):
-        """Return the Origin Range String that identify Data Plot object"""
+        """
+        Return the Origin Range String that identify Data Plot object
+        Parameters:
+            none
+        Returns:
+            Origin Range String
+        Examples:
+            gl=op.find_graph()[0]
+            p=gl.plot_list()[0]
+            print(p.lt_range())
+
+        """
         return f'{_layer_range(self.layer, False)}!{self.index() + 1}'
 
     @property
@@ -418,7 +545,14 @@ class Plot(BaseObject):
     def zlevels(self):
         """
         Returns the information about z-levels as a dictionary
-
+        Parameters:
+            none
+        Returns:
+            dictionary of z-levels
+        Examples:
+            gl=op.find_graph()[0]
+            p = gl.plot_list()[0]
+            print(p.zlevels)
 
         """
         numlevels = int(self.layer.GetNumProp(self._format_property('cmap.numcolors')))
@@ -620,7 +754,7 @@ class Plot(BaseObject):
             p = g[0].plot_list()[0]
             size = p.symbol_size * p.symbol_sizefactor
         """
-        return self.layer.GetNumProp(self._format_property('symbol.size'))
+        return self.layer.GetNumProp(self._format_property('symbol.sizefactor'))
 
     @symbol_sizefactor.setter
     def symbol_sizefactor(self, fac):
@@ -644,6 +778,14 @@ class Plot(BaseObject):
     def transparency(self):
         """
         returns the plot's line or symbol transparency in percent
+        Parameters:
+            none
+        Returns:
+            transparency in percent
+        Examples:
+            gl=op.find_graph()[0]
+            p = gl.plot_list()[0]
+            print(p.transparency)
         """
         return self.layer.GetNumProp(self._format_property('transparency'))
 
@@ -651,17 +793,29 @@ class Plot(BaseObject):
     def transparency(self, t):
         """
         set the plot's line or symbol transparency in percent
+        Parameters:
+            t(int):0-100
+        Returns:
+            transparency in percent
+        Examples:
+            gl=op.find_graph()[0]
+            p = gl.plot_list()[0]
+            p.transparency=60
+
         """
         self.layer.SetNumProp(self._format_property('transparency'), t)
 
     def remove(self):
         """
         Deletes plot.
-
         Parameters:
-
+            none
         Returns:
             None
+        Examples:
+            gl=op.find_graph()[0]
+            p = gl.plot_list()[0]
+            p.remove()
         """
         self.obj.Destroy()
 
@@ -672,7 +826,8 @@ class Plot(BaseObject):
         Parameters:
             wks (WSheet): the worksheet to use
             kwargs : columns and the corresponding axis
-
+        Returns:
+            None
         Examples:
             wks = op.find_sheet('w', 'Book1')
             gl = op.find_graph('Graph1')[0]
@@ -692,8 +847,17 @@ class Plot(BaseObject):
         For line plots only, to set Fill Area Under curve option
 
         Parameters:
-            above (int): color for fill from the plot to a base, which can be the X axis or next plot (type=9)
-            type (int): 9=fill to next data plot,  see https://www.originlab.com/doc/LabTalk/ref/Set-cmd#Specifying_Pattern
+            above (int): fill color of "Pattern Above" (or "Pattern")
+            type (int): fill area option, 9=Fill to next data plot – above below colors,  see https://www.originlab.com/doc/LabTalk/ref/Set-cmd#Specifying_Pattern
+            below (int): fill color of "Pattern Below"
+
+
+        Returns:
+            none
+        Examples:
+            gl=op.find_graph()[0]
+            p=gl.plot_list()[0]
+            p.set_fill_area(2, 9, 3)
         """
         sname = self.layer.GetStrProp(self._format_property('name'))
         po.LT_execute(f'set {sname} -pf 1')
@@ -702,14 +866,15 @@ class Plot(BaseObject):
             po.LT_execute(f'set {sname} -pfb {above}')
         if below != -1:
             po.LT_execute(f'set {sname} -p2fb {below}')
-            
+
     def set_cmd(self, *args):
         '''
         Execute labtalk set command for this data plot
 
         Parameters:
             args: set command options
-
+        Returns:
+            none
         Examples:
             wks = op.find_sheet('w', 'Book1')
             gl = op.find_graph('Graph1')[0]
@@ -725,7 +890,7 @@ class Plot(BaseObject):
     @property
     def group(self):
         """
-        Check if data plot in group or not. 
+        Check if data plot in group or not.
 
         Parameters:
 
@@ -747,7 +912,17 @@ class GLayer(BaseLayer):
         return 'GLayer: ' + self.lt_range()
 
     def lt_range(self):
-        """Return the Origin Range String that identify Graph Layer object"""
+        """
+        Return the Origin Range String that identify Graph Layer object
+        Parameters:
+            none
+        Returns:
+            Origin Range String
+        Examples:
+            gl=op.find_graph()[0]
+            print(gl.lt_range())
+
+        """
         return _layer_range(self.obj, False)
 
     def rescale(self, skip = ''):
@@ -777,7 +952,8 @@ class GLayer(BaseLayer):
         Parameters:
             begin(int): plot index, -1 is the same as 0
             end(int): -1 to the last, otherwise ending plot index (0-offset)
-
+        Returns:
+            None
         Examples:
             graph = op.new_graph(template='scatter')
             gl=graph[0]
@@ -810,40 +986,81 @@ class GLayer(BaseLayer):
     def xlim(self):
         """
         Property getter for X axis limits.
-
         Parameters:
-
+            none
         Returns:
             New X axis limits
+        Examples:
+            gl=op.find_graph()[0]
+            print(gl.xlim)
         """
         return self.axis('x').limits
     @xlim.setter
     def xlim(self, limits):
-        """save as set_xlim"""
+        """
+        Sets X axis scale begin(From), end(To) and step(Increment)
+        Parameters:
+            limit(axis scale):(begin,end, step)
+        Returns:
+            New axis limits
+        Examples:
+            gl=op.find_graph()[0]
+            gl.xlim=(2,9,3)
+        """
         return self.set_xlim(limits)
 
     @property
     def ylim(self):
         """
-        See Also:
-            xlim property getter
+        Property getter for Y axis limits.
+        Parameters:
+            none
+        Returns:
+            Y axis limits
+        Examples:
+            gl=op.find_graph()[0]
+            print(gl.ylim)
         """
         return self.axis('y').limits
     @ylim.setter
     def ylim(self, limits):
-        """save as set_xlim"""
+        """
+        Sets Y axis scale begin(From), end(To) and step(Increment)
+        Parameters:
+            limit(axis scale):(begin,end, step)
+        Returns:
+            New axis limits
+        Examples:
+            gl=op.find_graph()[0]
+            gl.ylim=(2,9,3)
+        """
         return self.set_ylim(limits)
 
     @property
     def zlim(self):
         """
-        See Also:
-            xlim property getter
+        Property getter for Y axis limits.
+        Parameters:
+            none
+        Returns:
+            Z axis limits
+        Examples:
+            gl=op.find_graph()[0]
+            print(gl.zlim)
         """
         return self.axis('z').limits
     @zlim.setter
     def zlim(self, limits):
-        """save as set_xlim"""
+        """
+        Sets Z axis scale begin(From), end(To) and step(Increment)
+        Parameters:
+            limit(axis scale):(begin,end, step)
+        Returns:
+            New axis limits
+        Examples:
+            gl=op.find_graph()[0]
+            gl.zlim=(2,9,3)
+        """
         return self.set_zlim(limits)
 
 
@@ -916,7 +1133,7 @@ class GLayer(BaseLayer):
             Scale type of axis
 
         Examples:
-            st = lay.zscale
+            st = lay.xscale
         """
         return self.axis('x').scale
 
@@ -941,16 +1158,27 @@ class GLayer(BaseLayer):
     @property
     def yscale(self):
         """
-        See Also:
-            xscale property getter
+        Property getter for Y axis scale type.
+        Parameters:
+            none
+        Returns:
+            Scale type of axis
+        Examples:
+            st = lay.yscale
         """
         return self.axis('y').scale
 
     @yscale.setter
     def yscale(self, scaletype):
         """
-        See Also:
-            xscale property setter
+        Property setter for Y axis scale type.
+        Parameters:
+            scaletype (int or str): Supported string value of scaltype:
+                ['linear', 'log10', 'probability', 'probit', 'reciprocal', 'offset_reciprocal', 'logit', 'ln', 'log2']
+        Returns:
+            New scale type of y axis
+        Examples:
+            lay.yscale = 'log10'
         """
         self.axis('y').scale = scaletype
         return self.yscale
@@ -958,16 +1186,27 @@ class GLayer(BaseLayer):
     @property
     def zscale(self):
         """
-         See Also:
-            xscale property getter
+        Property getter for Y axis scale type.
+        Parameters:
+            none
+        Returns:
+            Scale type of axis
+        Examples:
+            st = lay.yscale
         """
         return self.axis('z').scale
 
     @zscale.setter
     def zscale(self, scaletype):
         """
-        See Also:
-            xscale property setter
+        Property setter for Z axis scale type.
+        Parameters:
+            scaletype (int or str): Supported string value of scaltype:
+                ['linear', 'log10', 'probability', 'probit', 'reciprocal', 'offset_reciprocal', 'logit', 'ln', 'log2']
+        Returns:
+            New scale type of z axis
+        Examples:
+            lay.zscale = 'log10'
         """
         self.axis('z').scale = scaletype
         return self.axis('z').scale
@@ -1013,7 +1252,7 @@ class GLayer(BaseLayer):
 
     def remove(self, obj: any):
         """
-        Returns object in the layer.
+        remove object in the layer.
 
         Parameters:
             obj: Can be graph object or plot object
@@ -1022,8 +1261,9 @@ class GLayer(BaseLayer):
             None
 
         Examples:
-            items = lay.plot_list()
-            item = lay.plot_list()[0]
+            gl=op.find_graph()[0]
+            label = gl.label('xb')
+            label.remove()
         """
         if isinstance(obj, Label):
             self.remove_label(obj)
@@ -1214,7 +1454,7 @@ class GPage(BasePage):
         for elem in self.obj.Layers:
             yield GLayer(elem)
 
-    def save_fig(self, path='', type='auto', replace=True, width = 0):
+    def save_fig(self, path='', type='auto', replace=True, width=0, ratio=0):
         """
         export to a file
 
@@ -1225,6 +1465,7 @@ class GPage(BasePage):
         type(str): if auto, then use graph last exported settings, otherwise 'png', 'emf' etc
         replace(bool): if file existed, silently replace or not
         width(int): Pixcels. 0 will use last exported setting only if type=auto, if not auto, better specify this.
+        ratio (int): Size Factor (%), for emf and svg
 
         Return:
         -------
@@ -1263,10 +1504,14 @@ class GPage(BasePage):
             exp += ' overwrite:=skip'
         if width > 0:
             exp += f' tr1.Unit:=2 tr1.Width:={width}'
+        elif ratio > 0 and type.lower() in ['emf', 'svg']:
+            exp += f' tr.Advanced.Resolution:=1 tr1.Unit:=3 tr1.Width:={ratio}'
         if path:
             exp += f' path:="{path}"'
+        LASTEXP = '__LASTEXP'
+        po.LT_set_str(LASTEXP, '')
         self.obj.LT_execute(exp)
-        return po.LT_get_str('__LASTEXP')
+        return po.LT_get_str(LASTEXP)
 
     def add_layer(self, type = 0):
         """
@@ -1301,13 +1546,12 @@ class GPage(BasePage):
 
         Returns:
             None
+        examples:
+            gl = op.find_graph('graph1')
+            gl.copy_page('png', 600,100, True)
         '''
         if fmt.upper() == 'OLE':
-            COPY_PAGE_RATIO = 'System.CopyPage.Ratio'
-            oldRatio = po.LT_evaluate(COPY_PAGE_RATIO)
-            po.LT_set_var(COPY_PAGE_RATIO, ratio)
-            self.method_int('copy', 'OLE')
-            po.LT_set_var(COPY_PAGE_RATIO, oldRatio)
+            with CopyPageRatio(ratio) as _:
+                self.method_int('copy', 'OLE')
         else:
             self.lt_exec(f'copyimg igp:={self.name} type:={fmt.lower()} tb:={1 if tb else 0} res:={res} ratio:={ratio}')
-

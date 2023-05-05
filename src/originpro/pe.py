@@ -23,6 +23,8 @@ def search(name='', kind=0):
         kind (int): Page Short Name if 0, Subfolder Name if 1
     Returns:
         Current path if page/folder is empty, or path where page/folder is located
+    Examples:
+        op.pe.search('Graph1',0)
     """
     with _LTTMPOUTSTR() as pp:
         po.LT_execute(f'pe_path page:="{name}" path:={pp.name}$ type:={kind};')
@@ -35,6 +37,9 @@ def cd(path=None):
         path (str): Path of the directory to move into
     Returns:
         Current path
+    Examples:
+        path=op.pe.search('Graph1',0)
+        op.pe.cd(path)
     """
     if path is not None:
         po.LT_execute(f'pe_cd path:="{path}"')
@@ -48,6 +53,10 @@ def mkdir(path, chk=False):
         chk (bool): Specify if check folder exists or not. If set to True, then will not force create enumerated new one if already existed
     Returns:
         Path created
+    Examples:
+        path=op.pe.search('Graph1',0)
+        op.pe.cd(path)
+        op.pe.mkdir('Folder2', True)
     """
     with _LTTMPOUTSTR() as pp:
         po.LT_execute(f'pe_mkdir folder:="{path}" chk:={int(chk)} path:={pp.name}$;')
@@ -61,6 +70,11 @@ def move(name, path):
         path (str): path of the location where the page should be moved to
     Returns:
         None
+    Examples:
+        path=op.pe.search('Graph1',0)
+        op.pe.cd(path)
+        op.pe.mkdir('Folder2', True)
+        op.pe.move('Folder2','/UNTITLED/')
     """
     po.LT_execute(f'pe_move move:="{name}" path:="{path}";')
 
@@ -93,9 +107,25 @@ class Folder(BaseObject):
                 yield pg
 
 def active_folder():
-    '''Active Folder in Project Explorer'''
+    """
+    Active Folder in Project Explorer
+    Parameters:
+        none
+    Returns:
+       Folder Objects
+    Examples:
+        fd=op.pe.active_folder()
+    """
     return Folder(active_obj('Folder'))
 
 def root_folder():
-    '''Root Folder in Project Explorer'''
+    """
+    Root Folder in Project Explorer
+    Parameters:
+        none
+    Returns:
+       Page Objects
+    Examples:
+        fd=op.pe.root_folder()
+    """
     return Folder(po.GetRootFolder())

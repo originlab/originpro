@@ -4,6 +4,7 @@ A package for interacting with Origin software via Python.
 Copyright (c) 2020 OriginLab Corporation
 """
 # pylint: disable=C0103,W0611
+import warnings
 oext = False
 _EXIT = [False]
 _OBJS_COUNT = [0]
@@ -50,8 +51,7 @@ except ImportError:
             po.Detach()
     atexit.register(_exit_handler)
 
-import warnings
-if po.LT_get_var('@V') < 10.05:
+if po.LT_get_var('@V') < 10.10:
     warnings.simplefilter(action='ignore', category=FutureWarning)
 
 try:

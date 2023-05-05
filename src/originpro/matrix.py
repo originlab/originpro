@@ -8,7 +8,7 @@ try:
     from .config import np, npdtype_to_orgdtype, orgdtype_to_npdtype
 except ImportError:
     pass
-from .config import oext
+from .config import oext, po
 from .base import DSheet, DBook
 
 class MSheet(DSheet):
@@ -32,12 +32,13 @@ class MSheet(DSheet):
     @property
     def depth(self):
         """
-        return the number of matrix objects in the matrix sheet
-
+        Parameters:
+            none
+        Returns:
+            return the number of matrix objects in the matrix sheet
         Examples:
-
-        >>>ms = op.find_sheet('m')
-        >>>ms.depth
+            >>>ms = op.find_sheet('m')
+            >>>ms.depth
         """
         return self.obj.GetNumMats()
 
@@ -45,12 +46,14 @@ class MSheet(DSheet):
     def depth(self, z):
         """
         set the number of matrix objects in the matrix sheet
-
+        Parameters:
+            z(int):number of matrix objects in the matrix sheet
+        Returns:
+            number of matrix objects in the matrix sheet
         Examples:
-
-        ms=op.new_sheet('m', hidden=True)
-        ms.depth = 100
-        print(ms.depth)
+            ms=op.new_sheet('m', hidden=True)
+            ms.depth = 100
+            print(ms.depth)
         """
         self.obj.SetNumMats(z)
         return self.obj.GetNumMats()
@@ -255,6 +258,13 @@ class MSheet(DSheet):
     def get_missing_value(self, index=0):
         """
         get the internal missing value, which is needed when data type is not double.
+        Parameters:
+            index(int): matrix object index
+        Returns:
+            (float) missing value
+        Examples:
+            ms=op.find_sheet('m')
+            print(ms.get_missing_value())
         """
         return self.get_float(f'col{index+1}.missing')
 
@@ -265,7 +275,8 @@ class MSheet(DSheet):
     def xymap(self):
         """
         Get Matrix xy values.
-
+        Parameters:
+            none
         Returns:
             (list): x1, x2, y1, y2
 
@@ -282,7 +293,8 @@ class MSheet(DSheet):
 
         Parameters:
             xy(list): x1, x2, y1, y2
-
+        Returns:
+            (list): x1, x2, y1, y2
         Examples:
             ms=op.find_sheet('M')
             ms.xymap = x1, x2, y1, y2
@@ -367,7 +379,8 @@ class MSheet(DSheet):
             index (int): Matrix object index or 'x', 'y' for sheet XY labels
             val   (list): the text to set
             type_  (str): A column label row character (see https://www.originlab.com/doc/LabTalk/ref/Column-Label-Row-Characters) or a user defined parameter name
-
+        Returns:
+            none
         Examples:
             ms=op.find_sheet('m')
             ms.set_label('y', 'Lattitude')
@@ -388,13 +401,29 @@ class MSheet(DSheet):
         Parameters:
             labels (list): the text to set
             type_ (str): A column label row character (see https://www.originlab.com/doc/LabTalk/ref/Column-Label-Row-Characters) or a user defined parameter name
-
+        Returns:
+            none
         Examples:
-            ms=op.find_sheet('M')
+            ms=op.find_sheet('m')
             ms.set_labels(['long name for col A', 'long name for col B'], 'L')
         """
         for ii, val in enumerate(labels[:self.depth]):
             self.set_label(ii + offset, val, type_)
+
+    def from_img(self, img):
+        """
+        ss
+
+        Parameters:
+            img(IPage): input image page
+        Returns:
+            None
+        Examples:
+            ms = op.find_sheet('m')
+            img = op.find_image('Image1')
+            ms.from_img(img)
+        """
+        po.LT_execute(f'cv2mat img:=[{img.name}]1! mat:={self.lt_range(False)}')
 
 class MBook(DBook):
     """

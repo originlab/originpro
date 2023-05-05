@@ -66,6 +66,16 @@ class NLFit:
     def set_data(self, wks, x, y, yerr='', xerr='', z=''):
         """
         set the XY data with optional error bar column, or XYZ data
+        Parameters:
+            wks(worksheet):
+            x,y(int or string):column index or name
+            yerr,xerr,z(int or string):column index or name
+        Returns:
+            none
+        Examples:
+            model=op.NLFit('Gauss')
+            wks=op.find_sheet()
+            model.set_data(wks, 0, 1, xerr='D' )
         """
         rng = wks.to_xy_range(x, y, z if z else yerr, xerr)
         tr = self._get_tree_name()
@@ -80,6 +90,17 @@ class NLFit:
     def set_mdata(self, ms, z):
         """
         set the Matrix data
+        Parameters:
+            ms(matrix sheet):
+            z(int or string):matrix object index or long name
+        Returns:
+            none
+        Examples:
+            aa = np.array([ [1, 2, 3.9], [4.1, 5, 6], [7, 8.5, 9] ])
+            ma=op.new_sheet('m')
+            ma.from_np(aa)
+            model = op.NLFit('Plane')
+            model.set_mdata(ma,1)
         """
         if isinstance(z, int):
             z =+ 1
@@ -92,6 +113,16 @@ class NLFit:
     def set_range(self, rg):
         """
         set data as range string
+        Parameters:
+            rg(string): range string
+        Returns:
+            none
+        Examples:
+            gl=op.find_graph()[0]
+            dp=gl.plot_list()[0]
+            model=op.NLFit('Lorentz')
+            model.set_range(dp.lt_range())
+            model.fit()
         """
         tr = self._get_tree_name()
         xf = 'nlbegin'
@@ -110,7 +141,9 @@ class NLFit:
 
         Parameters:
             p(str): name of a parameter
-            val(bool or float or int): use False to turn of parameter fixing, or specify a value to fix it to
+            val(bool or float): use False to turn off parameter fixing, or specify a value to fix it to
+        Returns:
+            none
         Examples:
             model.fix_param('y0', 0)
             model.fix_param('xc', False)
@@ -125,7 +158,11 @@ class NLFit:
     def set_param(self, p, val):
         """
         set a parameter value before fitting
-
+        Parameters:
+            p(str): name of a parameter
+            val(float): value for the parameter
+        Returns:
+            none
         Examples:
             model.set_param('xc', 0.5)
         """
@@ -136,12 +173,15 @@ class NLFit:
         open a modal dialog box to control fitting parameters and iterations.
         You can click the minimize button on the parameters dialog to manipulate the graph like zooming in, or use
         screen reader etc. Must still call fit() after.
+        Parameters:
+            none
+        Returns:
+            none
         Examples:
             model = op.NLFit('Gauss')
+            wks=op.find_sheet()
             model.set_data(wks, 0, 1)
             model.param_box()
-            model.fit()
-            rr=model.result()
         """
         po.LT_execute('nlpara 1')
 
@@ -151,15 +191,30 @@ class NLFit:
 
         Parameters:
             iter (str or int): empty will iterate until converge, otherwise to specify the number of iterations
+        Returns:
+            none
+        Examples:
+            model = op.NLFit('Gauss')
+            wks=op.find_sheet()
+            model.set_data(wks, 0, 1)
+            model.param_box()
+            model.fit()
         """
         po.LT_execute(f'nlfit {iter}')
 
     def result(self):
         """
         you need to end the fitting by either calling result or report. If you need both, you need to call report first.
-
+        Parameters:
+            none
         Return:
             (dict) fitting parameters and statistics from the fit
+        Examples:
+            model = op.NLFit('Gauss')
+            wks=op.find_sheet()
+            model.set_data(wks, 0, 1)
+            model.param_box()
+            model.fit()
         """
         if not self._ended:
             po.LT_execute('nlend')
@@ -231,6 +286,16 @@ class LinearFit:
     def set_data(self, wks, x, y, err = ''):
         """
         set the XY data with optional error bar column
+        Parameters:
+            wks(worksheet):
+            x,y(int or string):column index or name
+            err(int or string):column index or name
+        Returns:
+            none
+        Examples:
+            lr = op.LinearFit()
+            wks=op.find_sheet()
+            lr.set_data(wks, 1, 2)
         """
         self._set('InputData.Range1.X$', wks.to_col_range(x))
         self._set('InputData.Range1.Y$', wks.to_col_range(y))
@@ -239,13 +304,27 @@ class LinearFit:
 
     def fix_slope(self, val):
         """
-        fix slope to a value or to turn off the fixing
+        fix slope to a value
+        Parameters:
+            val(float): slope value
+        Returns:
+            none
+        Examples:
+            lr=op.LinearFit()
+            lr.fix_slope=0.6
         """
         self._set('Fit.FixSlope', 1)
         self._set('Fit.FixSlopeAt', val)
     def fix_intercept(self, val):
         """
-        fix intercept to a value or to turn off the fixing
+        fix intercept to a value
+        Parameters:
+            val(float): intercept value
+        Returns:
+            none
+        Examples:
+            lr=op.LinearFit()
+            lr.fix_intercept=0.6
         """
         self._set('Fit.FixIntercept', 1)
         self._set('Fit.FixInterceptAt', val)

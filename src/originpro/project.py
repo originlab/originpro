@@ -151,7 +151,8 @@ def new_image(lname='', hidden=False) -> IPage:
     Parameters:
         lname (str): Long Name of the new window
         hidden (bool): True makes newly created window hidden
-
+    Returns:
+        IPage or None
     Examples:
         im = op.new_image()
     """
@@ -205,7 +206,16 @@ def _get_sheet(index, type):
     return bk.Layers(0) if bk else None
 
 def get_page(type, index=0) -> Union[WBook, MBook, GPage, IPage]:
-    """get WBook, MBook, GPage, IPage by index"""
+    """
+    get WBook, MBook, GPage, IPage by index
+    Parameters:
+        none
+    Returns:
+        WBook or MBook or GPage or IPage None
+    Examples:
+        w=op.get_page('w', 0)//there should a workbook exist
+
+    """
     page = _get_page(type, index)
     if page is None:
         return None
@@ -281,14 +291,14 @@ def find_graph(name='') -> GPage:
     Find the named graph (short name) and return a GPage object.
 
     Parameters:
-        name (str or int) Name of graph. If empty, then active graph, int int, then index into graph page collection
+        name (str or int) Name of graph. If empty, then active graph, if int, then index into graph page collection
 
     Returns:
         (GPage or None)
 
     Examples:
         g = op.find_graph('Graph2')
-        glayer=op.find_graph[0]
+        glayer=op.find_graph()[0]
     """
     return _find_page(name, _GPAGE_TYPE, po.OPT_GRAPH, GPage)
 
@@ -305,9 +315,7 @@ def find_image(name='') -> IPage:
     Examples:
         import numpy as np
         im = op.find_image('Image1')
-        ///------ Folger 10/29/2021 ORG-24006-P4 FASTER_COPY_IMAGE
         data = im.to_np()
-        ///------ End FASTER_COPY_IMAGE
         dataUpsideDown = np.flip(data, 1)
         im.from_np(dataUpsideDown)
     """
@@ -381,6 +389,10 @@ def pages(type_='') -> Union[WBook, MBook, GPage, IPage]:
         type_ (str): Page type, can be 'w', 'm', 'g', 'i'
     Returns:
         Page Objects
+    Examples:
+        wps=op.pages('w')
+        w1=next(wps)
+        wshet=w1[0]
     """
     for page in po.GetPages():
         try:
@@ -447,5 +459,5 @@ def save(file=''):
         if len(path('p'))==0:
             raise ValueError('must supplied a path if project not saved yet')
         po.LT_execute('save')
-        return
+        return False
     return po.Save(file)

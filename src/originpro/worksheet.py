@@ -64,11 +64,22 @@ class WSheet(DSheet):
             return
         colobj.LongName = str(key)
     @staticmethod
+    def _isParam(name, prefix):
+        if name[0] == prefix:
+            try:
+                return int(name[1:]) - 1
+            except ValueError:
+                pass
+        return -1
+    @staticmethod
     def _getlabel(colobj, type):
         if isinstance(type, int):
             if type < 0 or type > 15:
                 raise ValueError('Invalid index to user parameter')
             return colobj.GetUserDefLabel(type)
+        index = WSheet._isParam(type, 'P')
+        if index >= 0:
+            return colobj.GetParameter(index)
         try:
             dd = {
                 'L': colobj.GetLongName,
@@ -78,8 +89,8 @@ class WSheet(DSheet):
                 }
             func = dd[type]
             return func()
-        except KeyError:
-            raise ValueError('Invalid label row character')
+        except KeyError as e:
+            raise ValueError('Invalid label row character') from e
     @staticmethod
     def _setlabel(colobj, type, val):
         """type is int if user parameter row, or 'L', 'C', 'U' etc, see _col_label_row()"""
@@ -87,6 +98,9 @@ class WSheet(DSheet):
             if type < 0 or type > 15:
                 raise ValueError('Invalid index to user parameter')
             return colobj.SetUserDefLabel(type, str(val))
+        index = WSheet._isParam(type, 'P')
+        if index >= 0:
+            return colobj.SetParameter(index, str(val))
         if len(type) > 1:
             raise ValueError('Invalid label row character')
         try:
@@ -98,8 +112,8 @@ class WSheet(DSheet):
                 }
             func = dd[type]
             return func(str(val))
-        except KeyError:
-            raise ValueError('Invalid label row character')
+        except KeyError as e:
+            raise ValueError('Invalid label row character') from e
 
     @staticmethod
     def _cname(colobj, type):
@@ -157,6 +171,13 @@ class WSheet(DSheet):
         """
         Get the last row index in worksheet with data, hidden rows has no effect on this
         This is different from shape[0] which does not care of having data or not
+        Parameters:
+
+        Returns:
+            the last row index in worksheet with data
+        Examples:
+            wks=op.find_sheet()
+            nrows = wks.rows
         """
         return self.get_int('maxrows')
 
@@ -164,6 +185,13 @@ class WSheet(DSheet):
     def cols(self):
         """
         get the last column index in worksheet, this is the same as shape[1]
+        Parameters:
+
+        Returns:
+            get the last column index in worksheet
+        Examples:
+            wks=op.find_sheet()
+            ncols = wks.cols
         """
         return self.obj.Cols
 
@@ -171,6 +199,13 @@ class WSheet(DSheet):
     def cols(self, val):
         """
         set the number of columns in worksheet
+        Parameters:
+            val(int):number of columns
+        Returns:
+            the last column index in worksheet
+        Examples:
+            wks=op.find_sheet()
+            wks.cols=5
         """
         self.obj.Cols = val
         return self.cols
@@ -533,7 +568,7 @@ class WSheet(DSheet):
             except ValueError:
                 pass
             type = self._user_param_row(type, True)
-        self._setlabel(colobj, type, val)
+        return self._setlabel(colobj, type, val)
 
     def get_labels(self, type_ = 'L'):
         '''
@@ -636,7 +671,7 @@ class WSheet(DSheet):
         Delete worksheet columns
 
         Parameters:
-            c1 (int or str): Starting column to delete
+            c1 (int or str): Starting column to delete, <0 supported as from the end
             nc (int):      Number of columns to delete starting from c1
         Examples:
             wks.del_col(0)# del col A
@@ -681,15 +716,15 @@ class WSheet(DSheet):
         Sort worksheet data by a specified column
 
         Parameters:
-            col (int or str): If int, column index. If str, column name, short name first, then long name.
-            dec (bool): Accending or (dec)Decending
+            col (int or str): If int, column index (1-offset). If str, column name, short name first, then long name.
+            dec (bool): Ascending(False) or Descending(True)
 
         Returns:
             (int): 0 for success, otherwise an internal error code
 
         Examples:
-            wks.sort('A')#sort using 1st col, accending
-            wks.sort(0, True)#sort using 1st col, decending
+            wks.sort('A')#sort using 1st col, ascending
+            wks.sort(0, True)#sort using 1st col, descending
         """
         #we need LT col index for this
         ncol = self.lt_col_index(col)
@@ -810,7 +845,7 @@ class WSheet(DSheet):
 
         Parameters:
             n (int): by how many positions to move; if negative, columns are moved left,
-                                otherwise right.
+                     otherwise right.
             c1 (int): the index of the first columns in the contiguous set.
             ncols (int): the total number of columns in the contiguous set.
 
@@ -831,7 +866,6 @@ class WSheet(DSheet):
 
         Parameters:
             template (str): Cloneable graph template name.
-                If no folder specified, first looks in UFF, then EXE folder.
         Returns:
             (None)
         Example:
@@ -839,7 +873,7 @@ class WSheet(DSheet):
             ws.from_file(op.path('e') + r'Samples\Statistics\Automobile.dat', True)
             ws.plot_cloneable('mytemplate')
         '''
-        self.obj.LT_execute(f'worksheet -pa ? "{template}"')
+        self.obj.LT_execute(f'worksheet -pa ? "{template}";win -rp %H;')
 
     def set_formula(self, col, formula):
         """
@@ -894,7 +928,19 @@ class WSheet(DSheet):
         return str(col + 1)
 
     def to_xy_range(self, colx, coly, colyerr, colxerr=''):
-        'Make XY range string from columns'
+        """
+        Make XY range string from columns
+        Parameters:
+            colx, coly, colyerr, colxerr:type can be int or str, If int, column index. If str, tries short name and if not exists, tries column long name
+
+        Returns:
+            XY range string
+        Examples:
+            wks=op.find_sheet()
+            wks.cols=3
+            strRange = wks.to_xy_range(0,1,2)
+
+        """
         colx = self._to_lt_str(colx)
         coly = self._to_lt_str(coly)
         colyerr = self._to_lt_str(colyerr)
@@ -909,13 +955,35 @@ class WSheet(DSheet):
         return f'{srange}!{colspec}'
 
     def to_col_range(self, col):
-        'Make Column range string'
+        """
+        Make Column range string
+        Parameters:
+            col(int or str): If int, column index. If str, tries short name and if not exists, tries column long name
+        Returns:
+            XY range string
+        Examples:
+            wks=op.find_sheet()
+            wks.cols=3
+            strRange = wks.to_col_range(1)
+        """
         col = self._to_lt_str(col)
         srange = self.lt_range(False)
         return f'{srange}!{col}'
 
     def merge_label(self, type_ = 'L', unmerge=False):
-        'merge or unmerge specified label row'
+        """
+        merge or unmerge specified label row
+        Parameters:
+            type_(string):can be 'L' for longname, 'U' for Units, 'C' for comments
+            unmerge(bool):false for merge, true for unmerge
+        Returns:
+            (None)
+        Examples:
+            wks=op.find_sheet()
+            arrLName = ['longname','longname']
+            wks.set_labels(arrLName)
+            wks.merge_label()
+        """
         if org_ver() < 9.9:
             raise ValueError('merge_label requires Origin 2022 or later')
         nn = 0 if unmerge else 1
@@ -926,11 +994,17 @@ class WSheet(DSheet):
         It returns the contents of a worksheet cell as a string.
 
         Parameters:
-            row (int):          the row index.
-            col (int, str):     if int, it is the column index, otherwise the column name
+            row (int): the row index.
+            col (int, str): if int, it is the column index, otherwise the column name
 
         Returns:
-            (str)               the contents of a worksheet cell as a string.
+            (str) the contents of a worksheet cell as a string.
+        Examples:
+            wks=op.find_sheet()
+            ls = [1,2,3]
+            wks.from_list(0,ls)
+            nVal = wks.cell(0,0)
+            print(nVal)
         """
         if isinstance(col, int):
             colarg = col + 1
@@ -948,6 +1022,9 @@ class WSheet(DSheet):
             text (str):         The cell note content
         Returns:
             (None)
+        Examples:
+            wks=op.find_sheet()
+            wks.set_cell_note(0,0,'test cell note')
         """
         if org_ver() < 9.95:
             raise Exception("Needs Origin 2022b or later")

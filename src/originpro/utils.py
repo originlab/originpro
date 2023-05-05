@@ -12,11 +12,10 @@ PATHSEP = os.path.sep
 
 def lt_float(formula):
     """
-    get the result of a LabTalk expression
-
     Parameters:
         formula (str): any LaTalk expression
-
+    Returns:
+        the result of a LabTalk expression
     Examples:
         #Origin Julian days value
         >>>op.lt_float('date(1/2/2020)')
@@ -30,8 +29,10 @@ def lt_float(formula):
 
 def lt_int(formula):
     """
-    get the result of a LabTalk expression as int, see lt_float()
-
+    Parameters:
+        formula (str): any LaTalk expression
+    Returns:
+        the result of a LabTalk expression as int, see lt_float()
     Examples:
         >>> op.lt_int('color("green")')
 
@@ -45,8 +46,11 @@ def lt_int(formula):
 
 def get_lt_str(vname):
     """
-    return a LabTalk string variable value. To get LabTalk numeric values, use lt_int or lt_float
-
+    Parameters:
+        vname (str): a LabTalk string
+    Returns:
+        return a LabTalk string variable value. To get LabTalk numeric values,
+        use lt_int or lt_float
     Examples:
         #AppData path for the installed Origin
         >>> op.get_lt_str('%@Y')
@@ -59,7 +63,11 @@ def get_lt_str(vname):
 def set_lt_str(vname, value):
     """
     sets a LabTalk string variable value.
-
+    Parameters:
+        vname(string):LabTalk variable name
+        value:
+    Returns:
+        bool value that indicate Whether the value is set successfully
     Examples:
         fpath = op.file_dialog('*.log')
         op.set_lt_str('fname', fpath)
@@ -73,6 +81,12 @@ def set_lt_str(vname, value):
 def lt_exec(labtalk):
     """
     run LabTalk script
+    Parameters:
+        labtalk(string):LabTalk script
+    Returns:
+        bool value that indicate Whether the script is run successfully
+    Examples:
+        op.lt_exec('impasc -dm')
     """
     return po.LT_execute(labtalk)
 
@@ -100,7 +114,11 @@ def messagebox(msg, cancel=False):
 def set_lt_var(name, value):
     """
     sets a LabTalk numeric variable value. This is usually used for setting system variables
-
+    Parameters:
+        name(string):LabTalk numeric variable name
+        value:
+    Return:
+        none
     Example:
         op.set_lt_var("@IAS",5)#set import using multi-thread for files 5M or larger
     See Also:
@@ -111,6 +129,12 @@ def set_lt_var(name, value):
 def attach():
     """
     Attach to exising Origin instance
+    Parameters:
+        none
+    Return:
+        none
+    Example:
+        op.attach()
     """
     if oext:
         po.Attach()
@@ -118,6 +142,12 @@ def attach():
 def detach():
     """
     Detach Origin instance
+    Parameters:
+        none
+    Return:
+        none
+    Example:
+        op.detach()
     """
     if oext:
         po.Detach()
@@ -125,6 +155,12 @@ def detach():
 def exit():
     """
     exit the application
+    Parameters:
+        none
+    Return:
+        none
+    Example:
+        op.exit()
     """
     if oext:
         po.Exit()
@@ -135,12 +171,24 @@ def exit():
 def get_show():
     """
     If the Application is visible or not
+    Parameters:
+        none
+    Return:
+        True if visible, otherwise False
+    Example:
+        op.get_show()
     """
     return lt_int("@VIS") > 0
 
 def set_show(show = True):
     """
     Show or Hide the Application
+    Parameters:
+        show(bool):
+    Return:
+        none
+    Example:
+        op.get_show()
     """
     val = 100 if show else 0
     set_lt_var("@VIS", val)
@@ -183,6 +231,8 @@ def ocolor(rgb):
 
     Returns:
         (int) OColor
+    Example:
+        print(op.ocolor('Gray'))
     """
     if isinstance(rgb, str):
         orgb = lt_int(f'color({rgb})')
@@ -203,6 +253,8 @@ def to_rgb(orgb):
 
     Returns:
         (tuple) r,g,b
+    Example:
+        print(op.to_rgb(20))#128,128,128
     """
     rgb = lt_int(f'ocolor2rgb({orgb})')
     return int(rgb%256), int(rgb//256%256), int(rgb//256//256%256)
@@ -277,7 +329,7 @@ def last_backslash(fpath, action):
 
 def path(type = 'u'):
     r"""
-    Returns one of the Origin pre-defned paths: User Files folder, Origin EXe folder,
+    Returns one of the Origin pre-defined paths: User Files folder, Origin EXe folder,
     project folder, Project attached file folder.
 
     Parameters:
@@ -358,13 +410,29 @@ def file_dialog(type, title=''):
     return fname
 
 def origin_class(name):
-    'Get Origin base class'
+    """
+    Get Origin base class
+    Parameters:
+        name(string):Origin class name
+    Returns:
+         Origin base class
+    Examples:
+        ranges=op.origin_class('DataRange')
+    """
     if not oext:
         name = 'CPy' + name
     return getattr(po, name)
 
 def active_obj(name):
-    'Get active object'
+    """
+    Get active object
+    Parameters:
+        name(string):object type name
+    Returns:
+        active object
+    Examples:
+        page=op.active_obj('Page')
+    """
     activeobj = getattr(po, 'Active' + name)
     return activeobj if oext else activeobj()
 
@@ -397,7 +465,14 @@ def modi_col(offset=1):
     return lt_int(f'modifier({offset})')
 
 def org_ver():
-    'Origin Version as float'
+    """
+    Parameters:
+        none
+    Returns:
+        Origin Version as float
+    Examples:
+        print(op.org_ver())
+    """
     return po.LT_get_var('@V')
 
 class _LTTMPOUTSTR:
@@ -419,7 +494,9 @@ class _LTTMPOUTSTR:
 
 
 def make_DataRange(*args, rows=None):
-    'Make Origin DataRange object'
+    """
+    Make Origin DataRange object
+    """
     ranges = po.NewDataRange() if oext else origin_class('DataRange')()
     subs = []
     subrows = None
@@ -537,14 +614,20 @@ def _dict_to_xml(dd, bAttributes = False):
 
 def lt_dict_to_tree(dd, treename, add_tree = False, check_attributes = False):
     """
-    Converts dictionary dd to an xml tree string and sets the value of a LabTalk tree variable to
+    Converts dictionary dd to an xml tree string and sets the value of a LabTalk tree variable
     to the xml tree string. If bAddTreeVar is False and the tree variable does not already exist,
     the tree variable will not be added. Pass True as bAddTreeVar if you want to make sure that
     the tree variable is added first if it does not exist.
     Parameters:
         dd (dictionary)
-        treevarname (str) the name of the tree variable
-        bAddTreeVar If True, the tree variable will be added if it does not exist
+        treename(str): the name of the tree variable
+        add_tree:If True, the tree variable will be added if it does not exist
+        check_attributes(bool):whether to check attributes
+    Returns:
+        none
+    Examples:
+        dd={'name':'bob', 'age':14, 'class':'p1'}
+        op.lt_dict_to_tree(dd,'tr',True)
     """
     strxml = _dict_to_xml(dd, check_attributes)
     strTempLTStringVar = '__strpytempvar'
@@ -619,11 +702,27 @@ def lt_tree_to_dict(name, add_attributes=False):
         return dd
 
 def lt_empty_tree():
-    'An empty Labtalk tree'
+    """
+    Parameters:
+        none
+    Returns:
+        An empty Labtalk tree
+    Examples:
+        tr=op.lt_empty_tree()
+
+    """
     return ET.Element('OriginStorage')
 
 def lt_delete_tree(name):
-    'Delete a Labtalk tree'
+    """
+    Delete a Labtalk tree
+    Parameters:
+        name(string):name of the Labtalk tree
+    Returns:
+        none
+    Examples:
+        tr=op.lt_empty_tree()
+    """
     po.LT_execute(f'del -vt {name}')
 
 def evaluate_FDF(ffname, indepvars, parameters):
@@ -640,3 +739,23 @@ def evaluate_FDF(ffname, indepvars, parameters):
         vy = op.evaluate_FDF('Gauss', vx, [1, 2, 3, 4])
     """
     return po.EvaluateFDF(ffname, indepvars, parameters)
+
+def olab_download(file):
+    """
+    download a file from Originlab website with blocking so
+    function will not return until it is done or encountering an error
+    Parameters:
+        file (str or int): file name with extention or the fid,
+                           which you can find out from Template Center
+    Returns:
+        0 if downloaded
+        1 if already downloaded and nothing to do
+        <0 error
+    Examples:
+        n=op.olab_download('RaisedReliefMap.otpu')
+        n=op.olad_download(939)
+    """
+    if isinstance(file, int):
+        fid = str(file)
+        return int(po.LT_evaluate(f'doc.download({fid})'))
+    return int(po.LT_evaluate(f'doc.download({file})'))

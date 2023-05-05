@@ -40,44 +40,147 @@ class BaseObject:
             return False
         return self.obj.IsValid()
     def index(self):
-        """interal index in corresponding collection of the object"""
+        """
+        interal index in corresponding collection of the object
+        Parameters:
+            none
+        Returns:
+            interal index
+        Examples:
+            wks1 = op.new_sheet()
+            print(wks1.index())
+        """
         return self.obj.GetIndex()
     def get_str(self, prop):
-        """Get object's LabTalk string property"""
+        """
+        Get object's LabTalk string property
+        Parameters:
+            prop(string): string prop like
+            [cmap.palette, colorlist,  name], details on Origin objects' reference pages
+        Returns:
+            object's string property
+        Examples:
+            wks1 = op.new_sheet()
+            print(wks1.get_str('name'))
+        """
         return self.obj.GetStrProp(prop)
     def get_int(self, prop):
-        """Get object's LabTalk int property"""
+        """
+        Get object's LabTalk int property
+        Parameters:
+            prop(string):int prop line
+            [cmap.stretchpal, cmap.linkpal symbol.kind], details on Origin objects' reference pages
+        Returns:
+            object's int property
+        Examples:
+            wks1 = op.new_sheet()
+            print(wks1.get_int('nrows'))
+        """
         try:
             return int(self.get_float(prop))
         except ValueError:
             return 0
     def get_float(self, prop):
-        """Get object's LabTalk float property"""
+        """
+        Get object's LabTalk float property
+        Parameters:
+            prop(string): float prop like symbol.size, details on Origin objects' reference pages
+        Returns:
+            object's float property
+        Examples:
+            p=op.find_graph()[0].plot_list()[0]
+            print(p.get_float('symbol.size'))
+        """
         return self.obj.GetNumProp(prop)
     def set_str(self, prop, value):
-        """Set object's LabTalk string property"""
+        """
+        Set object's LabTalk string property
+        Parameters:
+            prop(string):can be int/float/string property, details on Origin objects' reference pages
+            value:property value
+        Returns:
+            none
+        Examples:
+            wks1 = op.new_sheet()
+            wks1.set_str('name','test_set_str')
+        """
         self.obj.SetStrProp(prop, value)
     def set_int(self, prop, value):
-        """Set object's LabTalk int property"""
+        """
+        Set object's LabTalk int property
+        Parameters:
+            prop(string):prop string, details on Origin objects' reference pages
+            value:property value
+        Returns:
+            none
+        Examples:
+            wks1 = op.new_sheet()
+            wks1.set_int('nrows', 10)
+
+        """
         self.obj.SetNumProp(prop, int(value))
     def set_float(self, prop, value):
-        """Set object's LabTalk float property"""
+        """
+        Set object's LabTalk float property
+        Parameters:
+            prop(string):prop string, details on Origin objects' reference pages
+            value:property value
+        Returns:
+            none
+        Examples:
+            p=op.find_graph()[0].plot_list()[0]
+            p.set_float('symbol.size', 4.5)
+        """
         self.obj.SetNumProp(prop, value)
     def method_int(self, name, arg=''):
-        """execute object's LabTalk method that has an int return"""
+        """
+        execute object's LabTalk method that has an int return
+        Parameters:
+            name(string):prop string, details on Origin objects' reference pages
+            arg:property value
+        Returns:
+            (int)LabTalk method's return value
+        Examples:
+            wks1 = op.find_sheet()
+            issel = wks1.method_int('isColSel', '3') #return if 3rd col is selected
+        """
         try:
             return int(self.method_float(name, arg))
         except ValueError:
             return 0
     def method_float(self, name, arg=''):
-        """execute object's LabTalk method that has a float return"""
+        """
+        execute object's LabTalk method that has a float return
+        Parameters:
+            name(string):prop string, details on Origin objects' reference pages
+            arg:property value
+        Returns:
+            (float)LabTalk method's return value
+        Examples:
+            wks1 = op.new_sheet()
+            rowid=wks1.method_float('UserParam', '++test') #add user parameter row "test", and return its index on worksheet
+
+        """
         return self.obj.DoMethod(name, arg)
     def method_str(self, name, arg=''):
-        """execute object's LabTalk method that has a string return"""
+        """
+        execute object's LabTalk method that has a string return
+        Parameters:
+            name(string):prop string, details on Origin objects' reference pages
+            arg:property value
+        Returns:
+            (string)LabTalk method's return value
+        Examples:
+            wks = op.new_sheet()
+            row, col = 1,1
+            wks.set_cell_note(row,col,'test Note')
+            cnote = wks.method_str('GetNote',f'{row+1},{col+1}')
+
+        """
         return self.obj.DoStrMethod(name, arg)
 
     def lt_exec(self, labtalk):
-        """
+        r"""
         executes a LabTalk statement.
 
         Parameters:
@@ -88,12 +191,23 @@ class BaseObject:
 
         Examples:
             wb.lt_exec('page.longname$="lt_exec example"')
+            wks.lt_exec(r'expASC path:="c:\test\signal.csv";') #you can execute X-Function here
+
         """
         self.obj.LT_execute(labtalk)
 
     @property
     def name(self):
-        """short name of the object"""
+        """
+        short name of the object
+        Parameters:
+            none
+        Returns:
+            Origin object name
+        Examples:
+            gl=op.find_graph()[0]
+            print(gl.name)
+        """
         return self.obj.GetName()
     @name.setter
     def name(self, value):
@@ -141,6 +255,10 @@ class BaseObject:
     def comments(self):
         """
         Property getter returns long name of object.
+        Parameters:
+            none
+        Returns:
+            long name of object.
         Examples:
             wb.comments='My labs data'
             print(wb.comments)
@@ -150,6 +268,10 @@ class BaseObject:
     def comments(self, value):
         """
         Property setter sets the comments of an object.
+        Parameters:
+            value(string):content of comments
+        Returns:
+            none
         Examples:
             wb.comments='My labs data'
             print(wb.comments)
@@ -189,6 +311,10 @@ class BaseObject:
     def usertree(self):
         """
             Return User Tree as ElementTree
+        Parameters:
+            none
+        Returns:
+            ElementTree
         Examples:
             wks = op.new_sheet()
             wks.set_str('tree.data.name', 'Larry')
@@ -212,12 +338,26 @@ class BaseObject:
 
         Parameters:
             tr (ElementTree): tree to set
+        Returns:
+            none
+        Examples:
+            import xml.etree.ElementTree as ET
+            wks = op.new_sheet()
+            tr = wks.usertree
+            data = ET.SubElement(tr, 'data')
+            version = ET.SubElement(data, 'Version')
+            version.set('Label', 'Origin Version')
+            version.text = '9.8b'
+            wks.usertree = tr
         """
         self.set_str('tree', ET.tostring(tr, encoding='unicode'))
 
     @property
     def userprops(self):
         """
+        Parameters:
+            none
+        Returns:
             Return User Tree as dict
         Examples:
             wks = op.new_sheet()
@@ -250,6 +390,10 @@ class BaseLayer(BaseObject):
     def activate(self):
         """
         make layer/sheet active
+        Parameters:
+            none
+        Returns:
+            last_active layer index
         Examples:
             wks = op.find_sheet()
             wb = wks.get_book()
@@ -266,6 +410,14 @@ class BaseLayer(BaseObject):
     def destroy(self):
         """
         delete the sheet/layer
+        Parameters:
+            none
+        Returns:
+            none
+        Examples:
+            wks1=op.new_sheet()
+            wks1.destroy()
+
         """
         self.obj.Destroy()
 
@@ -293,17 +445,38 @@ class BasePage(BaseObject):
     def is_active(self):
         """
         Returns whether book is currently active
+        Parameters:
+            none
+        Returns:
+            bool that indicate if the book is active
+        Examples:
+            wb=op.new_book()
+            print(wb.is_active())
+
         """
         act_name = po.LT_get_str('%H')
         return act_name == self.name
 
     def lt_range(self):
-        """return the Origin Range String that iddentify page object"""
+        """
+        Parameters:
+            none
+        Returns:
+            return the Origin Range String that iddentify page object
+        Examples:
+            wb=op.new_book()
+            print(wb.lt_range())
+
+        """
         return f'[{self.obj.GetName()}]'
 
     def activate(self):
         """
         make page active
+        Parameters:
+            none
+        Returns:
+            none
         Examples:
             wb = op.find_book('w', 'Book2')
             wb.activate()
@@ -313,12 +486,28 @@ class BasePage(BaseObject):
     def destroy(self):
         """
         close the window
+        Parameters:
+            none
+        Returns:
+            none
+        Examples:
+            wb=op.new_book()
+            wb.destroy()
+
         """
         po.LT_execute(f'win -cd {self.obj.GetName()}')
 
     def duplicate(self):
         """
         duplicate the window
+        Parameters:
+            none
+        Returns:
+            the newly created window object
+        Examples:
+            wb=op.new_book()
+            wbDuplicate=wb.duplicate()
+
         """
         self.lt_exec('win -d')
         return self.__class__(list(po.GetPages())[-1])
@@ -367,7 +556,15 @@ class DSheet(BaseLayer):
 
     @property
     def shape(self):
-        """return the rows and columns of a sheet"""
+        """
+        Parameters:
+            none
+        Returns:
+            (tuple) return the rows and columns of a sheet
+        Examples:
+            wks=op.find_sheet()
+            print(wks.shape)
+        """
         return self.obj.GetRowCount(), self.obj.GetColCount()
     @shape.setter
     def shape(self, val):
@@ -440,7 +637,7 @@ class DSheet(BaseLayer):
             fname (str): File path and name to import.
             keep_DC (bool): Keep the Data Connector in the book after import
             dctype (str): Data Connector name, like "Import Filter", "MATLAB", "NetCDF", if not specified, CSV or Excel connector will be used based on file name
-            sel (str): selection in the file, this will depends on the connector
+            sel (str): selection in the file, this will depend on the connector
             sparks (bool): Allows sparklines or not, True will follow GUI setting to add sparklines, False will disable it completely
         Returns:
             None
@@ -450,7 +647,7 @@ class DSheet(BaseLayer):
             fn=op.path('e') + 'Samples\\Import and Export\donations.csv'
             wks.from_file(fn, False)#remove connector after import to allow further edit of data
             wks2=op.new_sheet()
-            wks2.from_file(op.path()+'test.xlsx')#assuming you have this in UFF(user file folder)
+            wks2.from_file(op.path()+'test.xlsx')#assuming you have this in UFF(user files folder)
         """
         ext = get_file_ext(fname)
         DC = dctype if dctype else _DC_from_ext(ext)
@@ -458,7 +655,16 @@ class DSheet(BaseLayer):
         return dc.imp(fname, sel, sparks)
 
     def lt_range(self, use_name=True):
-        """Return the Origin Range String that identify Data Sheet object"""
+        """
+        Parameters:
+            use_name(bool):
+        Returns:
+            Return the Origin Range String that identify Data Sheet object
+        Examples:
+            ws=op.find_sheet()
+            print(ws.lt_range())
+
+        """
         return _layer_range(self.obj, use_name)
 
     @abc.abstractmethod
@@ -477,9 +683,11 @@ class DSheet(BaseLayer):
     @property
     def tabcolor(self):
         """
-        returns the LabTalk color code of the sheet tab
-        If sheet tab has no custom color 0 will be return
-
+        Parameters:
+            none
+        Returns:
+            returns the LabTalk color code of the sheet tab
+            If sheet tab has no custom color 0 will be returned
         Examples:
             cc = wks.tabcolor
             if cc:

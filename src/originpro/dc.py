@@ -46,30 +46,45 @@ class Connector:
             self.wks.remove_DC()
 
     def settings(self):
-        '''Import settings'''
+        '''
+        Parameters:
+            none
+        Returns:
+            Import settings
+        Examples:
+            wks=op.find_sheet()
+            dc=op.Connector(wks)
+            ss=dc.settings()
+        '''
         return self._optn()['Settings']
 
     @property
     def source(self):
         """
         Property getter returns the source of Data Connector
-
         Parameters:
-
+            none
         Returns:
             (str) Data Source
+        Examples:
+            wks=op.find_sheet()
+            dc=op.Connector(wks)
+            print(dc.source)
         """
         return self.wks.get_str('DC.Source')
     @source.setter
     def source(self, s):
-        """
+        r"""
         Property setter set the source of Data Connector
-
         Parameters:
             s(str): Data Source
-
         Returns:
             None
+        Examples:
+            wks=op.find_sheet()
+            dc=op.Connector(wks)
+            dc.source=op.path('e')+r'Samples\Import and Export\S15-125-03.dat'
+            dc.imp()
         """
         self.wks.set_str('DC.Source', s)
 
@@ -96,7 +111,20 @@ class Connector:
         return self._trOptn
 
     def imp(self, fname='', sel='', sparks=False):
-        '''Import file'''
+        r'''
+        Import file
+        Parameters:
+            fname(string): source file name
+            sel(string):selection
+        Returns:
+            none
+        Examples:
+            wks=op.find_sheet()
+            dc=op.Connector(wks)
+            f=op.path('e')+r'Samples\Import and Export\ASCII Simple.dat'
+            dc.imp(f)
+
+        '''
         optn = self._trOptn
         if optn:
             lt_dict_to_tree(optn, self._trLTname, True, True)
