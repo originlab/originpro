@@ -721,7 +721,7 @@ def lt_delete_tree(name):
     Returns:
         none
     Examples:
-        tr=op.lt_empty_tree()
+        op.lt_delete_tree('tr')
     """
     po.LT_execute(f'del -vt {name}')
 
@@ -759,3 +759,14 @@ def olab_download(file):
         fid = str(file)
         return int(po.LT_evaluate(f'doc.download({fid})'))
     return int(po.LT_evaluate(f'doc.download({file})'))
+
+def _CreateSysVar():
+    class SysVars:
+        'System Variables Dict-like access'
+        def __setitem__(self, key, item):
+            po.LT_set_var('@' + key, float(item))
+        def __getitem__(self, key):
+            return po.LT_get_var('@' + key)
+    return SysVars()
+sysvar = _CreateSysVar()
+del _CreateSysVar

@@ -25,6 +25,7 @@ except ImportError:
                 pass
             if self._app is None:
                 self._app = OriginExt.Application()
+                self._app.LT_execute('sec -poc') # wait until OC ready
             return getattr(self._app, name)
         def Exit(self, releaseonly=False):
             'Exit if Application exists'
@@ -51,7 +52,7 @@ except ImportError:
             po.Detach()
     atexit.register(_exit_handler)
 
-if po.LT_get_var('@V') < 10.10:
+if oext or po.LT_get_var('@V') < 10.10:
     warnings.simplefilter(action='ignore', category=FutureWarning)
 
 try:

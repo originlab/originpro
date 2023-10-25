@@ -4,6 +4,7 @@ A package for interacting with Origin software via Python.
 Copyright (c) 2020 OriginLab Corporation
 """
 # pylint: disable=C0301,C0103,R0914,R0912
+from collections import abc
 try:
     from .config import np, npdtype_to_orgdtype, orgdtype_to_npdtype
 except ImportError:
@@ -74,7 +75,7 @@ class MSheet(DSheet):
             arr = np.array([[[1, 2, 3], [4, 5, 6]], [[11, 12, 13], [14, 15, 16]]])
             ms.from_np(arr)
         """
-        is_seq = isinstance(arr, (list, tuple))
+        is_seq = isinstance(arr, abc.Sequence)
         fmt = arr[0].dtype.type if is_seq else arr.dtype.type
         dfmt = npdtype_to_orgdtype.get(fmt)
         if dfmt is None:
@@ -412,7 +413,7 @@ class MSheet(DSheet):
 
     def from_img(self, img):
         """
-        ss
+        Convert image to Matrix
 
         Parameters:
             img(IPage): input image page

@@ -290,7 +290,7 @@ class BaseObject:
         Examples:
             print(wb.show)
         """
-        return self.obj.GetShow()
+        return bool(self.obj.GetShow())
     @show.setter
     def show(self, value):
         """
@@ -485,7 +485,7 @@ class BasePage(BaseObject):
 
     def destroy(self):
         """
-        close the window
+        Destroy the window
         Parameters:
             none
         Returns:
@@ -493,7 +493,6 @@ class BasePage(BaseObject):
         Examples:
             wb=op.new_book()
             wb.destroy()
-
         """
         po.LT_execute(f'win -cd {self.obj.GetName()}')
 

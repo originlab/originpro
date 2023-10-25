@@ -5,6 +5,7 @@ Copyright (c) 2020, 2021, 2022 OriginLab Corporation
 """
 # pylint: disable=C0301,C0103,W0622,R0912,R0904,R0913,R0914,R0915,C0302
 import os
+from collections import abc
 from datetime import datetime as dt, timedelta as tdlt, date, time
 from .config import po, oext
 from .base import DSheet, DBook
@@ -787,6 +788,10 @@ class WSheet(DSheet):
         See Also:
             to_list2
         """
+        def is_seq(d): return isinstance(d, abc.Sequence)
+        if oext and is_seq(data):
+            if not is_seq(data[0]):
+                data = [[d] for d in data]
         ncol = self._col_index(col)
         self.obj.SetData(data, row, ncol)
 

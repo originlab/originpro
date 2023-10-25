@@ -42,7 +42,7 @@ class Connector:
         self._trOptn = None
 
     def __del__(self):
-        if not self.keep:
+        if not self.keep and self.wks:
             self.wks.remove_DC()
 
     def settings(self):

@@ -6,12 +6,13 @@ Copyright (c) 2020 OriginLab Corporation
 # pylint: disable=C0301,C0103,W0622
 from typing import Union, List
 from .config import po, oext
-from .utils import get_file_ext, active_obj, path, origin_class
+from .utils import get_file_ext, active_obj, path, origin_class, org_ver
 from .worksheet import WSheet, WBook
 from .matrix import MSheet, MBook
 from .graph import GPage, GLayer
 from .base import BasePage
 from .image import IPage
+from .notes import Notes
 
 _WBOOK_TYPE = 'w'
 _MBOOK_TYPE = 'm'
@@ -157,6 +158,20 @@ def new_image(lname='', hidden=False) -> IPage:
         im = op.new_image()
     """
     return _new_page2(_IPAGE_TYPE, lname, None, hidden)
+
+def new_notes(name='') -> Notes:
+    """
+    Create a new Notes window
+
+    Parameters:
+        lname (str): Name of the new window
+    Returns:
+        Notes or None
+    Examples:
+        nt = op.new_notes()
+    """
+    notes = po.CreateNotePage(name)
+    return Notes(notes) if notes else None
 
 def new_sheet(type=_WBOOK_TYPE, lname='', template='', hidden=False) -> Union[WSheet, MSheet]:
     """
@@ -321,6 +336,22 @@ def find_image(name='') -> IPage:
     """
     return _find_page(name, _IPAGE_TYPE, po.OPT_IMAGE, IPage)
 
+def find_notes(name='') -> Notes:
+    """
+    Find the named Notes Window and return a Notes object.
+
+    Parameters:
+        name (str) Name of Image window. If empty, then active Notes window.
+
+    Returns:
+        (Notes or None)
+
+    Examples:
+        nt1 = op.find_notes('Notes')
+        nt2 = op.find_notes()
+    """
+    notes = po.GetNotePage(name) if name else po.ActiveNotePage()
+    return Notes(notes) if notes else None
 
 def load_book(fname) -> Union[WBook, MBook]:
     r"""
@@ -443,10 +474,10 @@ def new(asksave=False):
 
 def save(file=''):
     R"""
-    Saves the current project. If no file name given, prompt to Save As.
+    Saves the current project. If no file name given, then save to current project file.
 
     Parameters:
-        file (str): Path and file name to save the project as. If blank, the prompt with Save As...
+        file (str): Path and file name to save the project as. Save to current project file if blank.
 
     Returns:
         (bool) True if project is successfully saved
@@ -458,6 +489,7 @@ def save(file=''):
     if len(file)==0:
         if len(path('p'))==0:
             raise ValueError('must supplied a path if project not saved yet')
-        po.LT_execute('save')
-        return False
+        if org_ver() < 10.1:
+            po.LT_execute('save')
+            return True
     return po.Save(file)

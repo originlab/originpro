@@ -115,6 +115,11 @@ class IPage(BasePage):
             im2 = op.find_image('Image2')
             fn = folder + r'\*.tif'
             im2.from_file(fn)
+
+            import originpro as op
+            url = r'https://download.osgeo.org/geotiff/samples/gdal_eg/cea.tif'
+            iw=op.new_image()
+            iw.from_file(url)
         """
         if fname and fname[0] != '"':
             fname = f'"{fname}"'
