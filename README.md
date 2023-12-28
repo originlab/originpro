@@ -2,6 +2,7 @@
 
 This repo contains the released version of python source files for online documentation generating purpose, along with scripts to generate the docs, and GitHub actions to publish them.
 
+Please note that this repository is **not** monitored by our tech support colleges or core developers. For discussions please use our forum (https://my.originlab.com/forum/). For issues or urgent requests please use either the "Submit a Support Ticket" button or the online chat option over our official website: https://www.originlab.com/index.aspx?go=COMPANY/ContactUS.
 
 # Steps to build and test locally
 
