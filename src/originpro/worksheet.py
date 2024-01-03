@@ -393,6 +393,8 @@ class WSheet(DSheet):
         else:
             totalcols = min(self.obj.Cols - c1, numcols)
 
+        _, r2 = self.obj.GetBounds(c1, c1 + totalcols - 1)
+
         dd = {}
         for col in range(c1, c1 + totalcols):
             colobj = self.obj[col]
@@ -422,6 +424,9 @@ class WSheet(DSheet):
                 dfseries = pd.Series(dfseries)
 
             else:
+                cnt = r2 + 1 - len(coldata)
+                if cnt > 0:
+                    coldata += [float('nan')] * cnt
                 dfseries = pd.Series(coldata, list(range(len(coldata))), dtype=None if coldata else 'object')
             #loc = col - c1
             ## ML 06/25/2020 ORG-21995-P1 APPEND_EMPTY_ROWS_BEFORE_LONGER_SERIES_TO_ADD
@@ -788,7 +793,8 @@ class WSheet(DSheet):
         See Also:
             to_list2
         """
-        def is_seq(d): return isinstance(d, abc.Sequence)
+        def is_seq(d):
+            return isinstance(d, abc.Sequence)
         if oext and is_seq(data):
             if not is_seq(data[0]):
                 data = [[d] for d in data]

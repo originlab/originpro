@@ -52,7 +52,7 @@ except ImportError:
             po.Detach()
     atexit.register(_exit_handler)
 
-if oext or po.LT_get_var('@V') < 10.10:
+if oext or po.LT_get_var('@V') < 10.15:
     warnings.simplefilter(action='ignore', category=FutureWarning)
 
 try:
