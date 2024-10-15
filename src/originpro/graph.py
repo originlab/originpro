@@ -6,7 +6,7 @@ Copyright (c) 2020 OriginLab Corporation
 # pylint: disable=C0301,C0103,C0302,W0622,R0913,W0212
 from contextlib import contextmanager
 from .config import po
-from .base import BaseObject, BaseLayer, BasePage, _layer_range
+from .base import BaseObject, BaseLayer, BasePage, _layer_range, Label
 from .utils import to_rgb, ocolor, get_file_parts, last_backslash, origin_class, org_ver
 
 @contextmanager
@@ -280,105 +280,6 @@ class Axis:
         self.layer.LT_execute(cmd)
         return self.title
 
-
-class Label(BaseObject):
-    """
-    This class represents an instance of a text object on a GLayer.
-    """
-    def __init__(self, obj, layer):
-        self.layer=layer
-        super().__init__(obj)
-
-    def remove(self):
-        """
-        Deletes label.
-        Parameters:
-            none
-        Returns:
-            None
-        Examples:
-            gl=op.find_graph()[0]
-            label = gl.label('xb')
-            label.remove()
-        """
-        self.obj.Destroy()
-
-    # def __repr__(self) -> str:
-        # if self.obj.IsValid():
-            # return f'Label named {self.name} in [{self.layer.GetParent().Name}]{self.layer.Name}'
-        # else:
-            # raise RuntimeError('label no longer exists')
-
-    @property
-    def color(self):
-        """
-        Property getter returns the RGB color of the text object as a tuple (Red, Green, Blue)
-
-        Parameters:
-
-        Returns:
-            (tuple) r,g,b
-
-        Examples:
-            label = g[0].label('text')
-            red, green, blue = label.color
-        """
-        orgb = self.get_int('color')
-        return to_rgb(orgb)
-
-    @color.setter
-    def color(self, rgb):
-        """
-        Property setter for the RGB color of the text object
-
-        Parameters:
-            rgb(int, str, tuple): various way to specify color, see function ocolor(rgb) in op.utils
-
-        Returns:
-            None
-
-        Examples:
-            label = g[0].label('text')
-            label.color = 'Red'
-            label.color = 3            # 'Green'
-            label.color = '#00f'       # 'blue'
-            label.color = '#0000ff'    # 'blue'
-            label.color = [0, 255, 0]  # 'green'
-        """
-        self.set_int('color', ocolor(rgb))
-    @property
-    def text(self) -> str:
-        """
-        Property getter for object text.
-
-        Parameters:
-
-        Returns:
-            (str) Object text
-        Examples:
-            gl=op.find_graph()[0]
-            label = gl.label('xb')
-            print(label.text)
-        """
-        return self.obj.Text
-
-    @text.setter
-    def text(self, text: str) -> str:
-        """
-        Property setter for object text.
-
-        Parameters:
-            value (str): Text
-
-        Returns:
-            (str) Object text
-        Examples:
-            gl=op.find_graph()[0]
-            label = gl.label('yl')
-            label.text='123'
-        """
-        self.obj.Text = text
-        return self.text
 
 class Plot(BaseObject):
     """
@@ -1039,7 +940,7 @@ class GLayer(BaseLayer):
     @property
     def zlim(self):
         """
-        Property getter for Y axis limits.
+        Property getter for Z axis limits.
         Parameters:
             none
         Returns:
@@ -1186,7 +1087,7 @@ class GLayer(BaseLayer):
     @property
     def zscale(self):
         """
-        Property getter for Y axis scale type.
+        Property getter for Z axis scale type.
         Parameters:
             none
         Returns:
@@ -1210,45 +1111,6 @@ class GLayer(BaseLayer):
         """
         self.axis('z').scale = scaletype
         return self.axis('z').scale
-
-    def label(self, name):
-        """
-        Get a Label instance by name.
-
-        Parameters:
-            name (str): name of the label to be attached
-        Returns:
-            (Label)
-
-        Examples:
-            g = op.new_graph()
-            g[0].label('XB').remove()
-        """
-        lb = self.obj.GraphObjects(name)
-        if lb is None:
-            return None
-        return Label(lb, self.obj)
-
-    def remove_label(self, label):
-        """
-        Remove a label from a layer.
-
-        Parameters:
-            label (Label or str): Instance of Label or name of label to remove
-
-        Returns:
-            None
-
-        Examples:
-            g = op.new_graph()
-            g[0].remove_label('xb') # g[0] is 1st layer.
-        """
-        if isinstance(label, Label):
-            label.remove()
-        elif isinstance(label, str):
-            self.remove_label(self.label(label))
-        else:
-            raise TypeError('"label"" must ba an instance of either str or Label.')
 
     def remove(self, obj: any):
         """

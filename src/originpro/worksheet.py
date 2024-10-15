@@ -282,13 +282,28 @@ class WSheet(DSheet):
         colstohave = ndfcols
         colBeginData = c1
         if addindex:
-            colstohave += 1
-            colBeginData += 1
+            # Martin 06/24/2024 ORG-29146-P1 FROM_DF_FAIL_TO_HANDLE_MULTIINDEX_DATA_FRAME
+            # colstohave += 1
+            # colBeginData += 1
+            nCountIndex = df.index.nlevels
+            colstohave += nCountIndex
+            colBeginData += nCountIndex
+            # End FROM_DF_FAIL_TO_HANDLE_MULTIINDEX_DATA_FRAME
 
         self._check_add_cols(colstohave, c1)
         if addindex:
             # c1 should receive the index
-            self.obj[c1].SetData(df.index)
+            # Martin 06/24/2024 ORG-29146-P1 FROM_DF_FAIL_TO_HANDLE_MULTIINDEX_DATA_FRAME
+            #self.obj[c1].SetData(df.index)
+            if df.index.nlevels > 1:
+                nloop = c1
+                for i in range(df.index.nlevels):
+                    self.obj[nloop].SetLongName(df.index.names[i])
+                    self.obj[nloop].SetData(df.index.get_level_values(i))
+                    nloop += 1
+            else:
+                self.obj[c1].SetData(df.index)
+            # End FROM_DF_FAIL_TO_HANDLE_MULTIINDEX_DATA_FRAME
 
         bSetColumnAsMixedInGeneralCase = int(po.LT_get_var('@DFSM')) > 0    # ML 06/26/2020 ORG-21995-P2 FROM_DF_DONT_SET_TEXT_AND_NUMERIC_FOR_GENERAL_CASE_BY_DEFAULT
 

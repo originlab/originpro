@@ -7,7 +7,7 @@ Copyright (c) 2020 OriginLab Corporation
 import abc
 import xml.etree.ElementTree as ET
 from .config import po, oext, _EXIT, _OBJS_COUNT
-from .utils import origin_class, get_file_ext, _tree_to_dict, lt_empty_tree, ocolor
+from .utils import origin_class, get_file_ext, _tree_to_dict, lt_empty_tree, ocolor, to_rgb
 from .dc import Connector
 
 def _DC_from_ext(ext):
@@ -381,6 +381,127 @@ class BaseObject:
         #pass
 
 
+class GObject(BaseObject):
+    """
+    This class represents an instance of a text object on a GLayer.
+    """
+    def __init__(self, obj, layer):
+        self.layer=layer
+        super().__init__(obj)
+
+    def remove(self):
+        """
+        Deletes label.
+        Parameters:
+            none
+        Returns:
+            None
+        Examples:
+            gl=op.find_graph()[0]
+            label = gl.label('xb')
+            label.remove()
+        """
+        self.obj.Destroy()
+
+    # def __repr__(self) -> str:
+        # if self.obj.IsValid():
+            # return f'Label named {self.name} in [{self.layer.GetParent().Name}]{self.layer.Name}'
+        # else:
+            # raise RuntimeError('label no longer exists')
+
+    @property
+    def color(self):
+        """
+        Property getter returns the RGB color of the text object as a tuple (Red, Green, Blue)
+
+        Parameters:
+
+        Returns:
+            (tuple) r,g,b
+
+        Examples:
+            label = g[0].label('text')
+            red, green, blue = label.color
+        """
+        orgb = self.get_int('color')
+        return to_rgb(orgb)
+
+    @color.setter
+    def color(self, rgb):
+        """
+        Property setter for the RGB color of the text object
+
+        Parameters:
+            rgb(int, str, tuple): various way to specify color, see function ocolor(rgb) in op.utils
+
+        Returns:
+            None
+
+        Examples:
+            label = g[0].label('text')
+            label.color = 'Red'
+            label.color = 3            # 'Green'
+            label.color = '#00f'       # 'blue'
+            label.color = '#0000ff'    # 'blue'
+            label.color = [0, 255, 0]  # 'green'
+        """
+        self.set_int('color', ocolor(rgb))
+
+
+class Label(GObject):
+    @property
+    def text(self) -> str:
+        """
+        Property getter for object text.
+
+        Parameters:
+
+        Returns:
+            (str) Object text
+        Examples:
+            gl=op.find_graph()[0]
+            label = gl.label('xb')
+            print(label.text)
+        """
+        return self.obj.Text
+
+    @text.setter
+    def text(self, text: str) -> str:
+        """
+        Property setter for object text.
+
+        Parameters:
+            value (str): Text
+
+        Returns:
+            (str) Object text
+        Examples:
+            gl=op.find_graph()[0]
+            label = gl.label('yl')
+            label.text='123'
+        """
+        self.obj.Text = text
+        return self.text
+
+
+class Line(GObject):
+    @property
+    def width(self):
+        return self.get_float('linewidth')
+
+    @width.setter
+    def width(self, val):
+        return self.set_float('linewidth', val)
+
+    @property
+    def type(self):
+        return self.get_int('linetype')
+
+    @type.setter
+    def type(self, val):
+        return self.set_int('linetype', val)
+
+
 class BaseLayer(BaseObject):
     """base class for all Origin layers"""
     def __str__(self):
@@ -420,6 +541,70 @@ class BaseLayer(BaseObject):
 
         """
         self.obj.Destroy()
+
+    def label(self, name):
+        """
+        Get a Label instance by name.
+
+        Parameters:
+            name (str): name of the label to be attached
+        Returns:
+            (Label)
+
+        Examples:
+            g = op.new_graph()
+            g[0].label('XB').remove()
+        """
+        lb = self.obj.GraphObjects(name)
+        if lb is None:
+            return None
+        return Label(lb, self.obj)
+
+    def remove_label(self, label):
+        """
+        Remove a label from a layer.
+
+        Parameters:
+            label (Label or str): Instance of Label or name of label to remove
+
+        Returns:
+            None
+
+        Examples:
+            g = op.new_graph()
+            g[0].remove_label('xb') # g[0] is 1st layer.
+        """
+        if isinstance(label, Label):
+            label.remove()
+        elif isinstance(label, str):
+            self.remove_label(self.label(label))
+        else:
+            raise TypeError('"label"" must ba an instance of either str or Label.')
+
+    def add_label(self, text, x=None, y=None):
+        textobj = self.obj.GraphObjects.Add(2)
+        if textobj:
+            label = Label(textobj, self.obj)
+            label.set_int('attach', 0)
+            label.text = text
+            x1 = x if x else (self.get_float('x.from') + self.get_float('x.to')) /2
+            y1 = y if y else (self.get_float('y.from') + self.get_float('y.to')) /2
+            label.set_float('x1', x1)
+            label.set_float('y1', y1)
+            return label
+        return None
+
+    def add_line(self, x1, y1, x2, y2):
+        lineobj = self.obj.GraphObjects.Add(4)
+        if lineobj:
+            line = Line(lineobj, self.obj)
+            line.set_int('attach', 2)
+            line.set_float('x1', x1)
+            line.set_float('y1', y1)
+            line.set_float('x2', x2)
+            line.set_float('y2', y2)
+            return line
+        return None
 
 class BasePage(BaseObject):
     """

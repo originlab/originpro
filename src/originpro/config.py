@@ -68,6 +68,7 @@ try:
         np.uint32: po.DF_ULONG,
         np.complex128: po.DF_COMPLEX,
     }
+    npdtype_to_orgdtype[np.int64] = po.DF_LONG
     orgdtype_to_npdtype = {v: k for k, v in npdtype_to_orgdtype.items()}
 except ImportError:
     pass
