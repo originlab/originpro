@@ -582,6 +582,23 @@ class BaseLayer(BaseObject):
             raise TypeError('"label"" must ba an instance of either str or Label.')
 
     def add_label(self, text, x=None, y=None):
+        """
+        Add a label to a layer.
+
+        Parameters:
+            text (str): The text of a text label
+            x(float or None): The X coordinate of the left of the object
+            y(float or None): The Y coordinate of the top of the object
+
+        Returns:
+            (Label)
+
+        Examples:
+            gp = op.new_graph()
+            gl = gp[0]
+            text = gl.add_label("hello", 4, 8)
+            text.text = 'world'
+        """
         textobj = self.obj.GraphObjects.Add(2)
         if textobj:
             label = Label(textobj, self.obj)
@@ -595,6 +612,25 @@ class BaseLayer(BaseObject):
         return None
 
     def add_line(self, x1, y1, x2, y2):
+        """
+        Add a line to a layer.
+
+        Parameters:
+            x1(float or None): The begin X coordinate
+            y1(float or None): The brgin Y coordinate
+            x2(float or None): The end X coordinate
+            y2(float or None): The end Y coordinate
+
+        Returns:
+            (Line)
+
+        Examples:
+            gp = op.new_graph()
+            gl = gp[0]
+            line = gl.add_line(5, 5, 6, 8)
+            line.width = 5
+            line.set_int('arrowendshape', 2)
+        """
         lineobj = self.obj.GraphObjects.Add(4)
         if lineobj:
             line = Line(lineobj, self.obj)
