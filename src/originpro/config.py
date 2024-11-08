@@ -27,6 +27,8 @@ except ImportError:
                 self._app = OriginExt.Application()
                 self._app.LT_execute('sec -poc') # wait until OC ready
             return getattr(self._app, name)
+        def __bool__(self):
+            return self._app is not None
         def Exit(self, releaseonly=False):
             'Exit if Application exists'
             if self._app is not None:

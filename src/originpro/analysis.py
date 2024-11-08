@@ -38,7 +38,8 @@ class NLFit:
 
     def __del__(self):
         tr = self._get_tree_name()
-        po.LT_execute(f'del -vt {tr}')
+        if po:
+            po.LT_execute(f'del -vt {tr}')
 
     def _get_tree_name(self):
         if not self._tree_name:
@@ -267,7 +268,8 @@ class LinearFit:
 
     def __del__(self):
         tr = self._get_tree_name()
-        po.LT_execute(f'del -vt {tr}')
+        if po:
+            po.LT_execute(f'del -vt {tr}')
 
     def _get_tree_name(self):
         if not self._tree_name:
