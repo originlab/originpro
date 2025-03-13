@@ -5,6 +5,7 @@ Copyright (c) 2020 OriginLab Corporation
 """
 # pylint: disable=C0103,W0611
 import warnings
+import math
 oext = False
 _EXIT = [False]
 _OBJS_COUNT = [0]
@@ -54,8 +55,14 @@ except ImportError:
             po.Detach()
     atexit.register(_exit_handler)
 
-if oext or po.LT_get_var('@V') < 10.15:
-    warnings.simplefilter(action='ignore', category=FutureWarning)
+def check_ignore_warnings(func):
+    def inner(*args, **kwargs):
+        if oext or po.LT_get_var('@V') < 10.25 or math.isnan(po.LT_get_var('@MSW')):
+            with warnings.catch_warnings():
+                warnings.simplefilter(action='ignore', category=FutureWarning)
+                return func(*args, **kwargs)
+        return func(*args, **kwargs)
+    return inner
 
 try:
     import numpy as np

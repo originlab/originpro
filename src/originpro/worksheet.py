@@ -7,7 +7,7 @@ Copyright (c) 2020, 2021, 2022 OriginLab Corporation
 import os
 from collections import abc
 from datetime import datetime as dt, timedelta as tdlt, date, time
-from .config import po, oext
+from .config import po, oext, check_ignore_warnings
 from .base import DSheet, DBook
 from .utils import org_ver
 
@@ -75,7 +75,7 @@ class WSheet(DSheet):
     @staticmethod
     def _getlabel(colobj, type):
         if isinstance(type, int):
-            if type < 0 or type > 15:
+            if type < 0 or type >= 128:
                 raise ValueError('Invalid index to user parameter')
             return colobj.GetUserDefLabel(type)
         index = WSheet._isParam(type, 'P')
@@ -96,7 +96,7 @@ class WSheet(DSheet):
     def _setlabel(colobj, type, val):
         """type is int if user parameter row, or 'L', 'C', 'U' etc, see _col_label_row()"""
         if isinstance(type, int):
-            if type < 0 or type > 15:
+            if type < 0 or type >= 128:
                 raise ValueError('Invalid index to user parameter')
             return colobj.SetUserDefLabel(type, str(val))
         index = WSheet._isParam(type, 'P')
@@ -242,6 +242,7 @@ class WSheet(DSheet):
         """
         return self._col_index(col, convert_negative) + 1
 
+    @check_ignore_warnings
     def from_df(self, df, c1=0, addindex=False, head=''):
         r"""
         Sets a pandas DataFrame to an Origin worksheet.
@@ -367,6 +368,7 @@ class WSheet(DSheet):
                 self._setlabel(colobj, head_row, key)
             col += 1
 
+    @check_ignore_warnings
     def to_df(self, c1=0, numcols = -1, cindex = -1, head=''):
         """
         Creates a pandas DataFrame from an Origin worksheet.
@@ -920,6 +922,7 @@ class WSheet(DSheet):
             colobj = self._find_col(col)
             colobj.SetStrProp('formula', formula)
 
+    @check_ignore_warnings
     def report_table(self, *args):
         """
         Get Report table as DataFrame
@@ -1101,6 +1104,7 @@ class WBook(DBook):
         else:
             print(f'{wks.lt_range()} has no embedded')
 
+@check_ignore_warnings
 def from_series(*args):
     'Construct python list from pd series'
     data = []

@@ -86,10 +86,12 @@ class MSheet(DSheet):
             depth = len(arr)
             rows, cols = arr[0].shape
         else:
-            if arr.ndim < 2:
-                raise ValueError('1D array not supported')
-            if arr.ndim == 2:
+            #if arr.ndim < 2:
+                #raise ValueError('1D array not supported')
+            if arr.ndim in(1, 2):
                 self.depth = 1
+                if 1 == arr.ndim:
+                    arr = arr.reshape(1, arr.shape[0])
                 row,col = arr.shape
                 mat = self.obj.MatrixObjects(0)
                 mat.DataFormat = dfmt

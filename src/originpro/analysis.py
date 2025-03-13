@@ -169,6 +169,65 @@ class NLFit:
         """
         self._set(p, val)
 
+    def set_lbound(self, p, ctrl='>', val=None):
+        """
+        set parameter lower bounds in NLFit.
+        Parameters:
+            p(str): name of a parameter
+            ctrl(str): '>' or '>='
+            val(float): lower bound value
+        Returns:
+            none
+        Examples:
+            import originpro as op
+            wks = op.new_sheet()
+            fn=op.path('e') + r'Samples\Curve Fitting\Gaussian.dat'
+            wks.from_file(fn, False)
+            model2 = op.NLFit('Gauss')
+            model2.set_data(wks, 0, 1)
+            model2.set_lbound('y0','>','6')
+            model2.set_ubound('A','<','800')
+            model2.fit()
+            r, c = model2.report()
+        """
+        return self._set_bound('l', p, ctrl, val, '>', '>=')
+
+    def set_ubound(self, p, ctrl='<', val=None):
+        """
+        set parameter upper bounds in NLFit.
+        Parameters:
+            p(str): name of a parameter
+            ctrl(str): '<' or '<='
+            val(float): upper bound value
+        Returns:
+            none
+        Examples:
+            import originpro as op
+            wks = op.new_sheet()
+            fn=op.path('e') + r'Samples\Curve Fitting\Gaussian.dat'
+            wks.from_file(fn, False)
+            model2 = op.NLFit('Gauss')
+            model2.set_data(wks, 0, 1)
+            model2.set_lbound('y0','>','6')
+            model2.set_ubound('A','<','800')
+            model2.fit()
+            r, c = model2.report()
+        """
+        return self._set_bound('u', p, ctrl, val, '<', '<=')
+
+    def _set_bound(self, lu, p, ctrl, val, ctrlonx, ctrlon):
+        on = 0
+        if ctrl:
+            if ctrl == ctrlonx:
+                on = 1
+            elif ctrl == ctrlon:
+                on = 2
+        self._set(f'{lu}bon_{p}', 1 if on else 0)
+        if on:
+            self._set(f'{lu}bx_{p}', 1 if on == 1 else 0)
+        if val:
+            self._set(f'{lu}b_{p}', val)
+
     def param_box(self):
         """
         open a modal dialog box to control fitting parameters and iterations.
