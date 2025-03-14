@@ -540,7 +540,7 @@ class WSheet(DSheet):
 
         Parameters:
             col (int or str): If int, column index. If str, tries short name and if not exists, tries column long name
-            type (str): A column label row character (see https://www.originlab.com/doc/LabTalk/ref/Column-Label-Row-Characters) or a user defined parameter name
+            type (str): A column label row character (see https://www.originlab.com/doc/LabTalk/ref/Column-Label-Row-Characters) or a user defined parameter name. Note: the maximum number of user defined labels is 128.
 
         Returns:
             (str)
@@ -570,7 +570,7 @@ class WSheet(DSheet):
         Parameters:
             col (int or str): If int, column index. If str, tries short name and if not exists, tries column long name
             val (str): the text to set
-            type (str): A column label row character (see https://www.originlab.com/doc/LabTalk/ref/Column-Label-Row-Characters) or a user defined parameter name
+            type (str): A column label row character (see https://www.originlab.com/doc/LabTalk/ref/Column-Label-Row-Characters) or a user defined parameter name. Note: the maximum number of user defined labels is 128.
 
         Examples:
             wks=op.find_sheet()
