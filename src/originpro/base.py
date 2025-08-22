@@ -68,7 +68,7 @@ class BaseObject:
         """
         Get object's LabTalk int property
         Parameters:
-            prop(string):int prop line
+            prop(string):int prop like
             [cmap.stretchpal, cmap.linkpal symbol.kind], details on Origin objects' reference pages
         Returns:
             object's int property

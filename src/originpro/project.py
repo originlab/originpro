@@ -403,7 +403,7 @@ def graph_list(select='f', inc_embed=False) -> List[GPage]:
             if select == 'o' and not BasePage(page).is_open():
                 continue
             if page.GetType() == po.OPT_GRAPH:
-                glist.append(GPage(page))
+                glist.append(_make_page(page))
     else:
         for page in po.GraphPages:
             if not inc_embed and page.GetNumProp('isEmbedded'):

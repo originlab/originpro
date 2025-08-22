@@ -40,7 +40,7 @@ class Axis:
         types = {
             'x':2,'y':4,'z':1
             }
-        self.type = types[ax]
+        self.type = types[ax[0]]
         self.ax = ax
 
     @property
@@ -879,7 +879,10 @@ class GLayer(BaseLayer):
             (Axis)
 
         Examples:
-            ax = lay.axis('x')
+            graph = op.new_graph()
+            layer2 = graph.add_layer(2)
+            ay=layer2.axis('y2')
+            ay.title = 'Right value'
         """
         return Axis(self.obj, ax)
 
