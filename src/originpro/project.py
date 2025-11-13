@@ -5,6 +5,7 @@ Copyright (c) 2020 OriginLab Corporation
 """
 # pylint: disable=C0301,C0103,W0622
 from typing import Union, List
+from collections.abc import Generator
 from .config import po, oext
 from .utils import get_file_ext, active_obj, path, origin_class, org_ver
 from .worksheet import WSheet, WBook
@@ -413,13 +414,13 @@ def graph_list(select='f', inc_embed=False) -> List[GPage]:
 
     return glist
 
-def pages(type_='') -> Union[WBook, MBook, GPage, IPage]:
+def pages(type_='') -> Generator[WBook, MBook, GPage, IPage]:
     """
     All pages in project.
     Parameters:
         type_ (str): Page type, can be 'w', 'm', 'g', 'i'
     Returns:
-        Page Objects
+        Page Objects Generator
     Examples:
         wps=op.pages('w')
         w1=next(wps)

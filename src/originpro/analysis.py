@@ -170,7 +170,7 @@ class NLFit:
         self._set(p, val)
 
     def set_lbound(self, p, ctrl='>', val=None):
-        """
+        r"""
         set parameter lower bounds in NLFit.
         Parameters:
             p(str): name of a parameter
@@ -193,7 +193,7 @@ class NLFit:
         return self._set_bound('l', p, ctrl, val, '>', '>=')
 
     def set_ubound(self, p, ctrl='<', val=None):
-        """
+        r"""
         set parameter upper bounds in NLFit.
         Parameters:
             p(str): name of a parameter
