@@ -5,6 +5,7 @@ Copyright (c) 2020 OriginLab Corporation
 """
 # pylint: disable=C0103,C0301
 from typing import Union
+from collections.abc import Generator
 from .config import po, oext
 from .utils import _LTTMPOUTSTR, active_obj
 from .base import BaseObject
@@ -89,15 +90,16 @@ class Folder(BaseObject):
         path = self.obj.Path
         return path if oext else path()
 
-    def pages(self, type_='') -> Union[WBook, MBook, GPage, IPage]:
+    def pages(self, type_='') -> Generator[WBook, MBook, GPage, IPage]:
         """
         All pages in folder.
         Parameters:
             type_ (str): Page type, can be 'w', 'm', 'g', 'i'
         Returns:
-            Page Objects
+            Page Objects Generator
         Examples:
-        for wb in op.pages('w'):
+        fld = op.active_folder()
+        for wb in fld.pages('w'):
             for wks in wb:
                 print(f'Worksheet {wks.lt_range()} has {wks.rows} rows')
         """
