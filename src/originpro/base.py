@@ -604,8 +604,8 @@ class BaseLayer(BaseObject):
             label = Label(textobj, self.obj)
             label.set_int('attach', 0)
             label.text = text
-            x1 = x if x else (self.get_float('x.from') + self.get_float('x.to')) /2
-            y1 = y if y else (self.get_float('y.from') + self.get_float('y.to')) /2
+            x1 = x if x is not None else (self.get_float('x.from') + self.get_float('x.to')) /2
+            y1 = y if y is not None else (self.get_float('y.from') + self.get_float('y.to')) /2
             label.set_float('x1', x1)
             label.set_float('y1', y1)
             return label

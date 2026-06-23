@@ -315,7 +315,10 @@ class WSheet(DSheet):
                 dfseriestypechar = 'cat'        # our own "name" for convenience
             else:
                 #dfseriestypechar = df.dtypes[col - colBeginData].char
-                dfseriestypechar = value.dtype.char
+                try:
+                    dfseriestypechar = value.dtype.char
+                except AttributeError:
+                    dfseriestypechar = 'O'
             #print(dfseriestypechar)
             #print(value)
             displayFmt = -1
